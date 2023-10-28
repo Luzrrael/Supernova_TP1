@@ -2,6 +2,8 @@
 #cifrado, y devuelva el mensaje cifrado, mediante el cifrado césar. Probarla utilizando doctest,
 #con al menos 10 casos diferentes.
 
+from tkinter import *
+
 #***********************************************************
 
 def crearRelacion():
@@ -231,12 +233,9 @@ if __name__ == "__main__":
 #--------------------------------INTERFAZ GRAFICA--------------------------------------#
 ########################################################################################
 
-
-from tkinter import *
-
 """---------FUNCIONES------------"""
 
-def salir():
+def salir(ventana):
     ventana.destroy()
 
 def click_continuar():
@@ -324,50 +323,49 @@ def click_continuar():
 
 """---------VENTANA PRINCIPAL------------"""
 
-ventana = Tk()
-ventana.resizable(False,False)
-ventana.geometry("400x300")
-ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
-ventana.config(cursor="hand2",bg="#1C2833")
-ventana.iconbitmap("supernova.ico")
+def main():
 
-#Integrantes ---acerca de------
+    ventana = Tk()
+    ventana.resizable(False,False)
+    ventana.geometry("400x300")
+    ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
+    ventana.config(cursor="hand2",bg="#1C2833")
+    ventana.iconbitmap("supernova.ico")
 
-MAIN_SECTION_Y = 30
+    #Integrantes ---acerca de------
 
-texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova. Para continuar presione [Continuar]; de lo contrario [Salir]:"
-bienvenida = Label(ventana, text = texto_bienvenida, wraplength = 350)
-bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
-bienvenida.place(x = 25, y = MAIN_SECTION_Y)
+    MAIN_SECTION_Y = 30
 
-#Boton para acceder a la siguiente ventana ---primera ventana----
+    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova. Para continuar presione [Continuar]; de lo contrario [Salir]:"
+    bienvenida = Label(ventana, text = texto_bienvenida, wraplength = 350)
+    bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
+    bienvenida.place(x = 25, y = MAIN_SECTION_Y)
 
-btn_continuar = Button(ventana,text="Continuar", command=click_continuar)
-btn_continuar.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-btn_continuar.place(x=85, y = MAIN_SECTION_Y + 80)
+    #Boton para acceder a la siguiente ventana ---primera ventana----
 
-#Boton para salir ----primera ventana----
+    btn_continuar = Button(ventana,text="Continuar", command=click_continuar)
+    btn_continuar.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_continuar.place(x=85, y = MAIN_SECTION_Y + 80)
 
-btn_salir = Button(ventana, text="Salir", command=salir)
-btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
+    #Boton para salir ----primera ventana----
 
-#Sección de autores
+    btn_salir = Button(ventana, text="Salir", command=lambda:salir(ventana))
+    btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
 
-MADE_BY_Y = 200
+    #Sección de autores
 
-t_integrantes = Label(ventana, text="Construida por:")
-t_integrantes.place(x=140,y = MADE_BY_Y)
-t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
+    MADE_BY_Y = 200
 
-text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
-integrantes = Label(ventana, text=text_integrantes, wraplength=280)
-integrantes.config(bg="#1C2833", fg="white")
-integrantes.place(x=65,y = MADE_BY_Y + 20)
+    t_integrantes = Label(ventana, text="Construida por:")
+    t_integrantes.place(x=140,y = MADE_BY_Y)
+    t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
 
-
-
-ventana.mainloop()
+    text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
+    integrantes = Label(ventana, text=text_integrantes, wraplength=280)
+    integrantes.config(bg="#1C2833", fg="white")
+    integrantes.place(x=65,y = MADE_BY_Y + 20)
     
+    ventana.mainloop()
 
-    
+main()
