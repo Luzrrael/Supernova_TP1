@@ -86,30 +86,15 @@ def cifrar_c(cadena, clave):
     >>> cifrar_c("Z", 3)
     'C'
     
-    Los caracteres que no son alfanuméricos no se desplazan:
-    >>> cifrar_c("$#---/ABC", 5)
-    '$#---/FGH'
+    Los caracteres que no son alfanuméricos no se desplazan (tampoco letras acentuadas ni extrañas):
+    >>> cifrar_c("$#---/ABCÁÍÍÍÚ", 5)
+    '$#---/FGHÁÍÍÍÚ'
     
     >>> cifrar_c("PERRO", 1)
     'QFSSP'
     
     >>> cifrar_c("     ", 10)
     '     '
-    
-    >>> cifrar_c("PERRO", 1) == cifrar_c("PERRO", 1 + 27)
-    True
-    
-    >>> cifrar_c("HOLA MUNDO%%%&%/...;", 7) == cifrar_c("HOLA MUNDO%%%&%/...;", 7 + 27 * 8000)
-    True
-    
-    >>> cifrar_c("6000-3288", 1)
-    '7111-4399'
-    
-    >>> cifrar_c("9999-9999-caño", 1)
-    '0000-0000-dbop'
-    
-    >>> cifrar_c("Illuminatis", 0) == "Illuminatis"
-    True
     
     """
 
@@ -122,6 +107,26 @@ def cifrar_c(cadena, clave):
     
     
 def descifrar_c(codigo, clave):
+
+    """
+    
+    >>> descifrar_c("PERRO", 1) == descifrar_c("PERRO", 1 + 27)
+    True
+    
+    >>> descifrar_c("HOLA MUNDO%%%&%/...;", 7) == descifrar_c("HOLA MUNDO%%%&%/...;", 7 + 27 * 8000)
+    True
+    
+    >>> descifrar_c("7111-4399", 1)
+    '6000-3288'
+    
+    >>> descifrar_c("0000-0000-dbop", 1)
+    '9999-9999-caño'
+    
+    >>> descifrar_c("Illuminatis", 0) == "Illuminatis"
+    True
+    
+    """
+
     return cifrar_c(codigo, -clave)
     
 #***************************************************************
@@ -181,22 +186,6 @@ def cifrar_atbash(cadena):
     >>> cifrar_atbash(cifrar_atbash("PERRO")) == descifrar_atbash(cifrar_atbash("PERRO")) 
     True
     
-    >>> cifrar_atbash("$$$$$===?")
-    '$$$$$===?'
-    
-    >>> cifrar_atbash("abcdefghijklmnñopqrstuvwxyz")
-    'ZYXWVUTSRQPOÑNMLKJIHGFEDCBA'
-    
-    >>> cifrar_atbash("0")
-    '9'
-    
-    >>> cifrar_atbash("a")
-    'Z'
-    
-    >>> cifrar_atbash("ZYXWVUTSRQPOÑNMLKJIHGFEDCBA")
-    'abcdefghijklmnñopqrstuvwxyz'
-    
-    
     """
 
     codigo = ""
@@ -210,6 +199,26 @@ def cifrar_atbash(cadena):
 # el algoritmo de cifrado.    
     
 def descifrar_atbash(cadena):
+
+    """
+        
+    >>> descifrar_atbash("$$$$$===?")
+    '$$$$$===?'
+    
+    >>> descifrar_atbash("ZYXWVUTSRQPOÑNMLKJIHGFEDCBA")
+    'abcdefghijklmnñopqrstuvwxyz'
+    
+    >>> descifrar_atbash("9")
+    '0'
+    
+    >>> descifrar_atbash("AÉÍÓü")
+    'zÉÍÓü'
+    
+    >>> descifrar_atbash("abcdefghijklmnñopqrstuvwxyz")
+    'ZYXWVUTSRQPOÑNMLKJIHGFEDCBA'
+        
+    """
+    
     return cifrar_atbash(cadena)
     
 #***************************************************************
