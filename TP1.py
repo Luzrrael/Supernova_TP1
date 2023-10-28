@@ -55,12 +55,13 @@ def desplazar(caracter, clave):
     offset   = 0
     alnum = True
     
-    if(caracter.islower()):
-        cantidad = 27
-        offset   = 0
-    elif(caracter.isupper()):
-        cantidad = 27
-        offset   = 27
+    if(caracter.isalpha() and caracter in caracter_a_pos):
+        if(caracter.islower()):
+            cantidad = 27
+            offset   = 0
+        else:
+            cantidad = 27
+            offset   = 27
     elif(caracter.isdigit()):
         cantidad = 10
         offset   = 54
@@ -139,17 +140,18 @@ def asignar(caracter):
     pos_fin   = 0
     alnum = True
     
-    if(caracter.islower()):
-        caracter = caracter.upper()
-        offset   = 27
-        pos_fin  = 26
-    elif(caracter.isupper()):
-        caracter = caracter.lower()
-        offset   = 0
-        pos_fin  = 26
+    if(caracter.isalpha() and caracter in caracter_a_pos):
+        if(caracter.islower()):
+            caracter = caracter.upper()
+            offset   = 27
+            pos_fin  = 26
+        else:
+            caracter = caracter.lower()
+            offset   = 0
+            pos_fin  = 26
     elif(caracter.isdigit()):
-        offset = 54
-        pos_fin = 9
+            offset = 54
+            pos_fin = 9
     else:
         alnum = False
         
