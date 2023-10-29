@@ -241,6 +241,9 @@ def salir(ventana):
 def click_continuar():
 
 #--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------------------------------------
+def click_continuar():
+
+#--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------SEGUNDA VENTANA------------------------------
 
     MAIN_Y = 10
 
@@ -248,13 +251,14 @@ def click_continuar():
     new_ventana.resizable(False,False)
     new_ventana.geometry("400x250")
     new_ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
-    new_ventana.config(cursor="hand2")
+    new_ventana.iconbitmap("supernova.ico")
+    new_ventana.config(cursor="hand2", bg="#1C2833")
 
     #ENTRADA DE TEXTO LABEL Y CASILLA -----SEGUNDA VENTANA-------
             #uso Text para mejor visualizacion del texto
 
     label_entrada_texto = Label(new_ventana, text="Por favor, introduzca el texto a cifrar:")
-    label_entrada_texto.config(font = "Arial 11 bold")
+    label_entrada_texto.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
     label_entrada_texto.place(x = 65, y = MAIN_Y)
     entrada_texto = Text(new_ventana,width=40,height=5)#Para obtener todo el texto usamos .get("1.0", "end-1c")
     entrada_texto.place(x = 38, y = MAIN_Y + 30)
@@ -264,14 +268,16 @@ def click_continuar():
     CLAVE_X = 130
 
     label_entrada_clave = Label(new_ventana, text="Clave (sólo César)")
-    label_entrada_clave.place(x = CLAVE_X, y = MAIN_Y + 125)
+    label_entrada_clave.config(font = "Arial 10 bold",bg="#1C2833",fg="white")
+    label_entrada_clave.place(x = CLAVE_X - 15, y = MAIN_Y + 125)
+
     clave = IntVar()
     entrada_clave = Entry(new_ventana, textvariable=clave, width = 5)
     entrada_clave.place(x = CLAVE_X + 105, y = MAIN_Y + 125)
 
     #UNA SOLA FUNCION ENCARGADA DE REDIRIGIR A LAS FUNCIONES DE  CIFRADO Y DECIFRADO -----SEGUNDA VENTANA-------
 
-    def alpresionar(boton):
+    def al_presionar(boton):
         texto_obtenido = entrada_texto.get("1.0", "end-1c")
         clave_string = entrada_clave.get()
         
@@ -285,7 +291,7 @@ def click_continuar():
         else:
             clave = int(clave_string)
         
-        #Llamado de funciones
+        #Llamado de funciones --- botones
         
         if boton == "c-cesar":
             texto_cifrado = cifrar_c(texto_obtenido, clave)
@@ -307,17 +313,21 @@ def click_continuar():
     TOP_LEFT_X = 75
     TOP_LEFT_Y = MAIN_Y + 170
 
-    btn_cifrado_cesar = Button(new_ventana, text="Cifrar (César)", width = BUTTON_WIDTH, command=lambda: alpresionar("c-cesar"))
-    btn_cifrado_cesar.place(x = TOP_LEFT_X, y = TOP_LEFT_Y)
+    btn_cifrado_cesar = Button(new_ventana, text="Cifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-cesar"))
+    btn_cifrado_cesar.config(font="Arial 10 bold", relief="raised", bd=3)
+    btn_cifrado_cesar.place(x = TOP_LEFT_X - 5, y = TOP_LEFT_Y - 5)
 
-    btn_cifrado_atbash = Button(new_ventana, text="Descifrar (César)", width = BUTTON_WIDTH, command=lambda: alpresionar("d-cesar"))
-    btn_cifrado_atbash.place(x = TOP_LEFT_X + 130, y = TOP_LEFT_Y)
+    btn_decifrado_cesar = Button(new_ventana, text="Descifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-cesar"))
+    btn_decifrado_cesar.config(font="Arial 10 bold", relief="raised", bd=3)
+    btn_decifrado_cesar.place(x = TOP_LEFT_X + 130 + 5, y = TOP_LEFT_Y - 5 )
 
-    btn_decifrado_cesar = Button(new_ventana, text="Cifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: alpresionar("c-atbash"))
-    btn_decifrado_cesar.place(x = TOP_LEFT_X, y = TOP_LEFT_Y + 30)
+    btn_cifrado_atbash = Button(new_ventana, text="Cifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-atbash"))
+    btn_cifrado_atbash.config(font="Arial 10 bold", relief="raised", bd=3)
+    btn_cifrado_atbash.place(x = TOP_LEFT_X - 5, y = TOP_LEFT_Y + 30)
 
-    btn_decifrado_atbash = Button(new_ventana, text="Descifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: alpresionar("d-atbash"))
-    btn_decifrado_atbash.place(x = TOP_LEFT_X + 130, y = TOP_LEFT_Y + 30)
+    btn_decifrado_atbash = Button(new_ventana, text="Descifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-atbash"))
+    btn_decifrado_atbash.config(font="Arial 10 bold", relief="raised", bd=3)
+    btn_decifrado_atbash.place(x = TOP_LEFT_X + 130 + 5, y = TOP_LEFT_Y + 30)
 
     new_ventana.mainloop()
 
@@ -331,8 +341,6 @@ def main():
     ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
     ventana.config(cursor="hand2",bg="#1C2833")
     ventana.iconbitmap("supernova.ico")
-
-    #Integrantes ---acerca de------
 
     MAIN_SECTION_Y = 30
 
