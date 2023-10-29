@@ -7,6 +7,8 @@ from tkinter import *
 #***********************************************************
 
 def crearRelacion():
+    #Autor: José Daniel Arturo Segura Valer
+
     caracter_a_pos = {}
     pos_a_caracter = {}
     
@@ -18,9 +20,10 @@ def crearRelacion():
     # que dado un caracter devuelve su posición, y otro que dada una
     # posición devuelve un caracter
     
-    digitos    = "0123456789"
     minusculas = "abcdefghijklmnñopqrstuvwxyz"
     mayusculas = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+    digitos    = "0123456789"
+    
     caracteres = minusculas + mayusculas + digitos
     
     i = 0
@@ -79,6 +82,8 @@ def desplazar(caracter, clave):
     
 def cifrar_c(cadena, clave):
 
+    #Autor: Federico Aguilar
+
     """
     
     >>> cifrar_c("A", 4)
@@ -109,6 +114,8 @@ def cifrar_c(cadena, clave):
     
     
 def descifrar_c(codigo, clave):
+
+    #Autor: Federico Aguilar
 
     """
     
@@ -171,6 +178,8 @@ def asignar(caracter):
     
 def cifrar_atbash(cadena):
 
+    #Autor: Bryan Hernán Serrantes Ochoa
+
     """
     
     >>> cifrar_atbash("A")
@@ -201,6 +210,8 @@ def cifrar_atbash(cadena):
 # el algoritmo de cifrado.    
     
 def descifrar_atbash(cadena):
+
+    #Autor: Bryan Hernán Serrantes Ochoa
 
     """
         
@@ -238,12 +249,11 @@ if __name__ == "__main__":
 def salir(ventana):
     ventana.destroy()
 
-def click_continuar():
-
 #--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------------------------------------
 def click_continuar():
 
 #--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------SEGUNDA VENTANA------------------------------
+# Autor: Matías Agustín Martínez
 
     MAIN_Y = 10
 
@@ -332,6 +342,7 @@ def click_continuar():
     new_ventana.mainloop()
 
 """---------VENTANA PRINCIPAL------------"""
+#Autor: Lucas Ezequiel Zenobio
 
 def main():
 
