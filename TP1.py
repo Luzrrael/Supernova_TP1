@@ -235,85 +235,254 @@ def descifrar_atbash(cadena):
     return cifrar_atbash(cadena)
     
 #***************************************************************
+
+def validarUsuario(usuario):
+
+        """
+        
+        >>> validarUsuario("")
+        False
+        
+        >>> validarUsuario("UsuarioDemasiadoExtenso")
+        False
+        
+        >>> validarUsuario("Usuario&&&")
+        False
+        
+        >>> validarUsuario("12345678")
+        True
+        
+        >>> validarUsuario("Agamenón")
+        True
+        
+        >>> validarUsuario("Ayante_Oileo")
+        True
+        
+        >>> validarUsuario("Diomedes_1282")
+        True
+        
+        >>> validarUsuario("Pony.infernal")
+        True
+        
+        >>> validarUsuario("##$")
+        False
+        
+        >>> validarUsuario("--------")
+        True
+
+        """
+
+        longitud_valida = True if(len(usuario) >= 5 and len(usuario) <= 15) else False
+        caracteres_validos = True
+        
+        if(longitud_valida):
+            i = 0;
+            while(i < len(usuario) and caracteres_validos):
+                if(not usuario[i].isalnum() and not usuario[i] in "_-."):
+                    caracteres_validos = False
+                
+                i += 1
+                
+        return longitud_valida and caracteres_validos
+        
+        
+def validarClave(clave):
+
+    """
+        
+    Demasiado corta:
+    >>> validarClave("123")
+    False
+    
+    Sin mayúsculas:
+    >>> validarClave("jirafa1#")
+    False
+    
+    Sin minúsculas:
+    >>> validarClave("JIRAFA5*")
+    False
+    
+    Sin dígitos:
+    >>> validarClave("Jirafas-")
+    False
+    
+    Sin símbolos requeridos:
+    >>> validarClave("Jirafa7/")
+    False
+    
+    Con todos los requisitos:
+    >>> validarClave("Jirafa9#")
+    True
+    
+    Demasiado larga:
+    >>> validarClave("Hipopótamo3#")
+    False
+    
+    Con caracteres adyacentes repetidos:
+    >>> validarClave("Sello42#")
+    False
+    
+    >>> validarClave("Cabra12*")
+    True
+    
+    >>> validarClave("Dodo76-#")
+    True
+    
+    """
+
+    longitud_valida = True if(len(clave) >= 4 and len(clave) <= 8) else False
+    hay_mayus   = False
+    hay_minus   = False
+    hay_digit   = False
+    hay_simbolo = False
+    adyacentes  = False
+    
+    if(longitud_valida):
+        i = 0
+        while(i < len(clave) and not adyacentes):
+            if(clave[i].isupper()):
+                hay_mayus = True
+            elif(clave[i].islower()):
+                hay_minus = True
+            elif(clave[i].isdigit()):
+                hay_digit = True
+            elif(clave[i] in "_-#*"):
+                hay_simbolo = True
+                
+            i += 1
+            
+            if(i < len(clave) and clave[i] == clave[i - 1]):
+                adyacentes = True
+                
+    return longitud_valida and hay_mayus and hay_minus and hay_digit and hay_simbolo and not adyacentes
+    
+    
+#***************************************************************
     
 if __name__ == "__main__":
     import doctest  
     doctest.testmod()
 
-########################################################################################
-#--------------------------------INTERFAZ GRAFICA--------------------------------------#
-########################################################################################
 
-"""---------FUNCIONES------------"""
+#--------------------------------------INTERFAZ GRAFICA--------------------------------------#
 
-def salir(ventana):
-    ventana.destroy()
+#--------------------------------------VENTANA PRINCIPAL-------------------------------------#
+# Autor: Lucas Ezequiel Zenobio
 
-#--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------------------------------------
-def click_continuar():
+def crearVentanaPrincipal():
 
-#--------------------------------INTERFAZ CIFRADO Y DECIFRADO------------SEGUNDA VENTANA------------------------------
-# Autor: Matías Agustín Martínez
+    ventana_principal = Tk()
+    ventana_principal.resizable(False,False)
+    ventana_principal.geometry("400x300")
+    ventana_principal.title("TP Grupal Parte 1 - Grupo: Supernova")
+    ventana_principal.config(cursor="hand2",bg="#1C2833")
+    ventana_principal.iconbitmap("supernova.ico")
 
+    MAIN_SECTION_Y = 30
+
+    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova. Para continuar presione [Continuar]; de lo contrario [Salir]:"
+    bienvenida = Label(ventana_principal, text = texto_bienvenida, wraplength = 350)
+    bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
+    bienvenida.place(x = 25, y = MAIN_SECTION_Y)
+
+    #Boton para acceder a la siguiente ventana ---primera ventana----
+
+    btn_continuar = Button(ventana_principal,text="Continuar", command=click_ventana_cifrado)
+    btn_continuar.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_continuar.place(x=85, y = MAIN_SECTION_Y + 80)
+
+    #Boton para salir ----primera ventana----
+
+    btn_salir = Button(ventana_principal, text="Salir", command=lambda: ventana_principal.destroy())
+    btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
+
+    #Sección de autores
+
+    MADE_BY_Y = 200
+
+    t_integrantes = Label(ventana_principal, text="Construida por:")
+    t_integrantes.place(x=140,y = MADE_BY_Y)
+    t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
+
+    text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
+    integrantes = Label(ventana_principal, text=text_integrantes, wraplength=280)
+    integrantes.config(bg="#1C2833", fg="white")
+    integrantes.place(x=65,y = MADE_BY_Y + 20)
+    
+    return ventana_principal
+    
+    
+    
+    
+    
+#-------------------------------------VENTANA DE CIFRADO-------------------------------------#
+# Autor: Matías Agustín Martínez   
+    
+def al_presionar(boton, entrada_texto, entrada_clave):
+    texto_obtenido = entrada_texto.get("1.0", "end-1c")
+    clave_string = entrada_clave.get()
+        
+    #Si el campo está vacío o no es numérico se establece
+    #la clave en 0
+        
+    if(clave_string == "" or not clave_string.isdigit()):
+        clave = 0
+        entrada_clave.delete(0, END)
+        entrada_clave.insert(0, "0")
+    else:
+        clave = int(clave_string)
+        
+    #Llamado de funciones --- botones
+        
+    if boton == "c-cesar":
+        texto_cifrado = cifrar_c(texto_obtenido, clave)
+    elif boton == "c-atbash":
+        texto_cifrado = cifrar_atbash(texto_obtenido)
+    elif boton == "d-cesar":
+        texto_cifrado = descifrar_c(texto_obtenido, clave)
+    elif boton == "d-atbash":
+        texto_cifrado = descifrar_atbash(texto_obtenido)
+            
+    entrada_texto.delete("1.0", "end")
+    entrada_texto.insert("1.0",texto_cifrado)
+    
+    
+    
+    
+def crearVentanaCifrado():
+    
     MAIN_Y = 10
 
-    new_ventana = Tk()
-    new_ventana.resizable(False,False)
-    new_ventana.geometry("400x250")
-    new_ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
-    new_ventana.iconbitmap("supernova.ico")
-    new_ventana.config(cursor="hand2", bg="#1C2833")
+    ventana_cifrado = Tk()
+    ventana_cifrado.resizable(False,False)
+    ventana_cifrado.geometry("400x250")
+    ventana_cifrado.title("TP Grupal Parte 1 - Grupo: Supernova")
+    ventana_cifrado.iconbitmap("supernova.ico")
+    ventana_cifrado.config(cursor="hand2", bg="#1C2833")
 
     #ENTRADA DE TEXTO LABEL Y CASILLA -----SEGUNDA VENTANA-------
             #uso Text para mejor visualizacion del texto
 
-    label_entrada_texto = Label(new_ventana, text="Por favor, introduzca el texto a cifrar:")
+    label_entrada_texto = Label(ventana_cifrado, text="Por favor, introduzca el texto a cifrar:")
     label_entrada_texto.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
     label_entrada_texto.place(x = 65, y = MAIN_Y)
-    entrada_texto = Text(new_ventana,width=40,height=5)#Para obtener todo el texto usamos .get("1.0", "end-1c")
+    entrada_texto = Text(ventana_cifrado,width=40,height=5)#Para obtener todo el texto usamos .get("1.0", "end-1c")
     entrada_texto.place(x = 38, y = MAIN_Y + 30)
 
     #ENTRADA DE CLAVE PARA CIFRADO CESAR -----SEGUNDA VENTANA-------
 
     CLAVE_X = 130
 
-    label_entrada_clave = Label(new_ventana, text="Clave (sólo César)")
+    label_entrada_clave = Label(ventana_cifrado, text="Clave (sólo César)")
     label_entrada_clave.config(font = "Arial 10 bold",bg="#1C2833",fg="white")
     label_entrada_clave.place(x = CLAVE_X - 15, y = MAIN_Y + 125)
 
     clave = IntVar()
-    entrada_clave = Entry(new_ventana, textvariable=clave, width = 5)
+    entrada_clave = Entry(ventana_cifrado, textvariable=clave, width = 5)
     entrada_clave.place(x = CLAVE_X + 105, y = MAIN_Y + 125)
 
     #UNA SOLA FUNCION ENCARGADA DE REDIRIGIR A LAS FUNCIONES DE  CIFRADO Y DECIFRADO -----SEGUNDA VENTANA-------
-
-    def al_presionar(boton):
-        texto_obtenido = entrada_texto.get("1.0", "end-1c")
-        clave_string = entrada_clave.get()
-        
-        #Si el campo está vacío o no es numérico se establece
-        #la clave en 0
-        
-        if(clave_string == "" or not clave_string.isdigit()):
-            clave = 0
-            entrada_clave.delete(0, END)
-            entrada_clave.insert(0, "0")
-        else:
-            clave = int(clave_string)
-        
-        #Llamado de funciones --- botones
-        
-        if boton == "c-cesar":
-            texto_cifrado = cifrar_c(texto_obtenido, clave)
-        elif boton == "c-atbash":
-            texto_cifrado = cifrar_atbash(texto_obtenido)
-        elif boton == "d-cesar":
-            texto_cifrado = descifrar_c(texto_obtenido, clave)
-        elif boton == "d-atbash":
-            texto_cifrado = descifrar_atbash(texto_obtenido)
-            
-        entrada_texto.delete("1.0", "end")
-        entrada_texto.insert("1.0",texto_cifrado)
 
 
     #BOTONES -----SEGUNDA VENTANA-------
@@ -323,68 +492,35 @@ def click_continuar():
     TOP_LEFT_X = 75
     TOP_LEFT_Y = MAIN_Y + 170
 
-    btn_cifrado_cesar = Button(new_ventana, text="Cifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-cesar"))
+    btn_cifrado_cesar = Button(ventana_cifrado, text="Cifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-cesar", entrada_texto, entrada_clave))
     btn_cifrado_cesar.config(font="Arial 10 bold", relief="raised", bd=3)
     btn_cifrado_cesar.place(x = TOP_LEFT_X - 5, y = TOP_LEFT_Y - 5)
 
-    btn_decifrado_cesar = Button(new_ventana, text="Descifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-cesar"))
+    btn_decifrado_cesar = Button(ventana_cifrado, text="Descifrar (César)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-cesar", entrada_texto, entrada_clave))
     btn_decifrado_cesar.config(font="Arial 10 bold", relief="raised", bd=3)
     btn_decifrado_cesar.place(x = TOP_LEFT_X + 130 + 5, y = TOP_LEFT_Y - 5 )
 
-    btn_cifrado_atbash = Button(new_ventana, text="Cifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-atbash"))
+    btn_cifrado_atbash = Button(ventana_cifrado, text="Cifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("c-atbash", entrada_texto, entrada_clave))
     btn_cifrado_atbash.config(font="Arial 10 bold", relief="raised", bd=3)
     btn_cifrado_atbash.place(x = TOP_LEFT_X - 5, y = TOP_LEFT_Y + 30)
 
-    btn_decifrado_atbash = Button(new_ventana, text="Descifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-atbash"))
+    btn_decifrado_atbash = Button(ventana_cifrado, text="Descifrar (Atbash)", width = BUTTON_WIDTH, command=lambda: al_presionar("d-atbash", entrada_texto, entrada_clave))
     btn_decifrado_atbash.config(font="Arial 10 bold", relief="raised", bd=3)
     btn_decifrado_atbash.place(x = TOP_LEFT_X + 130 + 5, y = TOP_LEFT_Y + 30)
+    
+    return ventana_cifrado
 
-    new_ventana.mainloop()
 
-"""---------VENTANA PRINCIPAL------------"""
-#Autor: Lucas Ezequiel Zenobio
+def click_ventana_cifrado():
+    ventana_cifrado = crearVentanaCifrado()
+    ventana_cifrado.mainloop()
+    
+  
+
+#-------------------SECCIÓN MAIN-------------------#
 
 def main():
-
-    ventana = Tk()
-    ventana.resizable(False,False)
-    ventana.geometry("400x300")
-    ventana.title("TP Grupal Parte 1 - Grupo: Supernova")
-    ventana.config(cursor="hand2",bg="#1C2833")
-    ventana.iconbitmap("supernova.ico")
-
-    MAIN_SECTION_Y = 30
-
-    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova. Para continuar presione [Continuar]; de lo contrario [Salir]:"
-    bienvenida = Label(ventana, text = texto_bienvenida, wraplength = 350)
-    bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
-    bienvenida.place(x = 25, y = MAIN_SECTION_Y)
-
-    #Boton para acceder a la siguiente ventana ---primera ventana----
-
-    btn_continuar = Button(ventana,text="Continuar", command=click_continuar)
-    btn_continuar.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-    btn_continuar.place(x=85, y = MAIN_SECTION_Y + 80)
-
-    #Boton para salir ----primera ventana----
-
-    btn_salir = Button(ventana, text="Salir", command=lambda:salir(ventana))
-    btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-    btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
-
-    #Sección de autores
-
-    MADE_BY_Y = 200
-
-    t_integrantes = Label(ventana, text="Construida por:")
-    t_integrantes.place(x=140,y = MADE_BY_Y)
-    t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
-
-    text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
-    integrantes = Label(ventana, text=text_integrantes, wraplength=280)
-    integrantes.config(bg="#1C2833", fg="white")
-    integrantes.place(x=65,y = MADE_BY_Y + 20)
+    ventana_principal = crearVentanaPrincipal()
+    ventana_principal.mainloop()
     
-    ventana.mainloop()
-
 main()
