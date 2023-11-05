@@ -3,6 +3,7 @@
 #con al menos 10 casos diferentes.
 
 from tkinter import *
+import os.path
 
 #***********************************************************
 
@@ -387,13 +388,13 @@ def crearVentanaPrincipal():
 
     #Boton para acceder a la siguiente ventana ---primera ventana----
 
-    btn_continuar = Button(ventana_principal,text="Continuar", command=click_ventana_cifrado)
-    btn_continuar.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-    btn_continuar.place(x=85, y = MAIN_SECTION_Y + 80)
+    btn_crear_usuario = Button(ventana_principal,text="Crear usuario", command = click_nuevo_usuario)
+    btn_crear_usuario.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_crear_usuario.place(x=85, y = MAIN_SECTION_Y + 80)
 
     #Boton para salir ----primera ventana----
 
-    btn_salir = Button(ventana_principal, text="Salir", command=lambda: ventana_principal.destroy())
+    btn_salir = Button(ventana_principal, text="Ingreso usuario", command=lambda: ventana_principal.destroy())
     btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
     btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
 
@@ -414,41 +415,156 @@ def crearVentanaPrincipal():
     
     
     
+#------------------------------VENTANA DE CREACIÓN DE USUARIO--------------------------------#
+
+USUARIO_X = 85
+USUARIO_Y = 40
+
+def crearVentanaNuevoUsuario():
+
+    ventana_nuevo_usuario = Tk()
+    ventana_nuevo_usuario.resizable(False,False)
+    ventana_nuevo_usuario.geometry("400x350")
+    ventana_nuevo_usuario.title("Crear usuario")
+    ventana_nuevo_usuario.iconbitmap("supernova.ico")
+    ventana_nuevo_usuario.config(cursor="hand2", bg="#1C2833")
+
+    # Entrada de texto de usuario
+
+    label_entrada_usuario = Label(ventana_nuevo_usuario, text="Usuario:")
+    label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_entrada_usuario.place(x = USUARIO_X, y = USUARIO_Y)
     
+    entrada_usuario = Text(ventana_nuevo_usuario,width = 15, height = 1) #Para obtener todo el texto usamos .get("1.0", "end-1c")
+    entrada_usuario.place(x = USUARIO_X + 75, y = USUARIO_Y)
+
+    # Entrada de texto de clave
+
+    label_entrada_clave = Label(ventana_nuevo_usuario, text="Clave:")
+    label_entrada_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
+    label_entrada_clave.place(x = USUARIO_X + 8, y = USUARIO_Y + 30)
+
+    entrada_clave = Text(ventana_nuevo_usuario, width = 15, height = 1)
+    entrada_clave.place(x = USUARIO_X + 75, y = USUARIO_Y + 30)
+    
+    # Menú de opciones pregunta de seguridad
+    
+    label_pregunta = Label(ventana_nuevo_usuario, text="Pregunta secreta:")
+    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_pregunta.place(x = USUARIO_X + 55, y = USUARIO_Y + 70)
+    
+    pregunta_actual = StringVar(ventana_nuevo_usuario)
+    pregunta_actual.set("Selecciona una pregunta") 
+    option_menu_pregunta = OptionMenu(ventana_nuevo_usuario, pregunta_actual, *leerPreguntas())
+    option_menu_pregunta.config(width = 30)
+    option_menu_pregunta.place(x = USUARIO_X + 8, y = USUARIO_Y + 100)
+    
+    # Entrada de texto respuesta
+    
+    label_entrada_respuesta = Label(ventana_nuevo_usuario, text = "Respuesta:")
+    label_entrada_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_entrada_respuesta.place(x = USUARIO_X + 80, y = USUARIO_Y + 140)
+    
+    entrada_respuesta = Text(ventana_nuevo_usuario, width = 15, height = 1)
+    entrada_respuesta.place(x = USUARIO_X + 58, y = USUARIO_Y + 170)
+    
+    # Botón de creación de usuario
+    
+    btn_crear = Button(ventana_nuevo_usuario, text = "Crear", width = 10, height = 1, command = lambda: guardarDatos(ventana_nuevo_usuario, \
+    entrada_usuario, entrada_clave, entrada_respuesta, pregunta_actual))
+    
+    btn_crear.config(font="Arial 12 bold")
+    btn_crear.place(x = USUARIO_X + 67, y = USUARIO_Y + 240)
+    
+    #entrada_pregunta = Text(ventana_nuevo_usuario, width = 30, height = 1)
+    #entrada_pregunta.place(x = USUARIO_X, y = USUARIO_Y + 110)
+    
+    return ventana_nuevo_usuario
+
+
+
+def guardarDatos(ventana_nuevo_usuario, entrada_usuario, entrada_clave, entrada_respuesta, pregunta_actual):
+    usuarios = open("usuarios.csv", "a")
+    preguntas = leerPreguntas()
+    
+    nuevo_usuario = entrada_usuario.get("1.0", "end-1c")
+    nueva_clave   = entrada_clave.get("1.0", "end-1c")
+    respuesta     = entrada_respuesta.get("1.0", "end-1c")
+    
+    # Si no se selecciona ninguna, la pregunta por defecto es la primera
+    if(pregunta_actual.get() not in preguntas):
+        pregunta_actual.set(preguntas[0])
+        
+    id_pregunta   = preguntas.index(pregunta_actual.get()) + 1
+    
+    # Validación y verificación de existencia
+    if(not usuarioExiste(nuevo_usuario)):
+        if(validarUsuario(nuevo_usuario) and validarClave(nueva_clave) and respuesta != ""):
+            usuarios.write(nuevo_usuario + "," + nueva_clave + "," + str(id_pregunta) + "," + respuesta + "," + "0\n")
+        else:
+            temp = Label(ventana_nuevo_usuario, text = "Usuario, clave o respuesta inválidos")
+            temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+            temp.place(x = USUARIO_X + 10, y = USUARIO_Y + 280)
+            temp.after(3000, lambda: temp.destroy())
+            
+    else:
+        temp = Label(ventana_nuevo_usuario, text = "¡Identificador en uso!")
+        temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+        temp.place(x = USUARIO_X + 59, y = USUARIO_Y + 280)
+        temp.after(3000, lambda: temp.destroy())
+    
+    usuarios.close()
+
+
+
+def leerRegistro(archivo):
+    linea = archivo.readline()
+    linea = linea.rstrip()
+    return linea.split(",")
+
+
+
+def usuarioExiste(usuario):
+    usuarios = open("usuarios.csv", "r")
+    existe = False
+    
+    USUARIO = 0
+    
+    registro = leerRegistro(usuarios)
+    while(registro != [""] and not existe):
+        if(usuario == registro[USUARIO]):
+            existe = True
+            
+        registro = leerRegistro(usuarios)
+        
+    usuarios.close()
+    return existe
+    
+    
+
+def leerPreguntas():
+    archivo = open("preguntas.csv", "r")
+    preguntas = []
+    PREGUNTA  = 1
+    
+    linea = archivo.readline()
+    while(linea):
+        linea = linea.rstrip()
+        registro = linea.split(",")
+        preguntas.append(registro[PREGUNTA])
+        linea = archivo.readline()
+    
+    archivo.close()
+    return preguntas    
+
+
+
+def click_nuevo_usuario():
+    ventana_nuevo_usuario = crearVentanaNuevoUsuario()
+    ventana_nuevo_usuario.mainloop()
     
 #-------------------------------------VENTANA DE CIFRADO-------------------------------------#
 # Autor: Matías Agustín Martínez   
-    
-def al_presionar(boton, entrada_texto, entrada_clave):
-    texto_obtenido = entrada_texto.get("1.0", "end-1c")
-    clave_string = entrada_clave.get()
-        
-    #Si el campo está vacío o no es numérico se establece
-    #la clave en 0
-        
-    if(clave_string == "" or not clave_string.isdigit()):
-        clave = 0
-        entrada_clave.delete(0, END)
-        entrada_clave.insert(0, "0")
-    else:
-        clave = int(clave_string)
-        
-    #Llamado de funciones --- botones
-        
-    if boton == "c-cesar":
-        texto_cifrado = cifrar_c(texto_obtenido, clave)
-    elif boton == "c-atbash":
-        texto_cifrado = cifrar_atbash(texto_obtenido)
-    elif boton == "d-cesar":
-        texto_cifrado = descifrar_c(texto_obtenido, clave)
-    elif boton == "d-atbash":
-        texto_cifrado = descifrar_atbash(texto_obtenido)
-            
-    entrada_texto.delete("1.0", "end")
-    entrada_texto.insert("1.0",texto_cifrado)
-    
-    
-    
     
 def crearVentanaCifrado():
     
@@ -482,10 +598,7 @@ def crearVentanaCifrado():
     entrada_clave = Entry(ventana_cifrado, textvariable=clave, width = 5)
     entrada_clave.place(x = CLAVE_X + 105, y = MAIN_Y + 125)
 
-    #UNA SOLA FUNCION ENCARGADA DE REDIRIGIR A LAS FUNCIONES DE  CIFRADO Y DECIFRADO -----SEGUNDA VENTANA-------
-
-
-    #BOTONES -----SEGUNDA VENTANA-------
+    #BOTONES
     
     BUTTON_WIDTH = 15
     
@@ -509,6 +622,37 @@ def crearVentanaCifrado():
     btn_decifrado_atbash.place(x = TOP_LEFT_X + 130 + 5, y = TOP_LEFT_Y + 30)
     
     return ventana_cifrado
+
+
+
+def al_presionar(boton, entrada_texto, entrada_clave):
+    texto_obtenido = entrada_texto.get("1.0", "end-1c")
+    clave_string = entrada_clave.get()
+        
+    #Si el campo está vacío o no es numérico se establece
+    #la clave en 0
+        
+    if(clave_string == "" or not clave_string.isdigit()):
+        clave = 0
+        entrada_clave.delete(0, END)
+        entrada_clave.insert(0, "0")
+    else:
+        clave = int(clave_string)
+        
+    #Llamado de funciones --- botones
+        
+    if boton == "c-cesar":
+        texto_cifrado = cifrar_c(texto_obtenido, clave)
+    elif boton == "c-atbash":
+        texto_cifrado = cifrar_atbash(texto_obtenido)
+    elif boton == "d-cesar":
+        texto_cifrado = descifrar_c(texto_obtenido, clave)
+    elif boton == "d-atbash":
+        texto_cifrado = descifrar_atbash(texto_obtenido)
+            
+    entrada_texto.delete("1.0", "end")
+    entrada_texto.insert("1.0",texto_cifrado)
+
 
 
 def click_ventana_cifrado():
