@@ -3,7 +3,7 @@
 #con al menos 10 casos diferentes.
 
 from tkinter import *
-import os.path
+import os, os.path
 
 #***********************************************************
 
@@ -502,16 +502,9 @@ def guardarDatos(ventana_nuevo_usuario, entrada_usuario, entrada_clave, entrada_
         if(validarUsuario(nuevo_usuario) and validarClave(nueva_clave) and respuesta != ""):
             usuarios.write(nuevo_usuario + "," + nueva_clave + "," + str(id_pregunta) + "," + respuesta + "," + "0\n")
         else:
-            temp = Label(ventana_nuevo_usuario, text = "Usuario, clave o respuesta inválidos")
-            temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-            temp.place(x = USUARIO_X + 10, y = USUARIO_Y + 280)
-            temp.after(3000, lambda: temp.destroy())
-            
+            crearLabelTemporal(ventana_nuevo_usuario, "Usuario, clave o respuesta inválidos", USUARIO_X + 10, USUARIO_Y + 280, 3000)
     else:
-        temp = Label(ventana_nuevo_usuario, text = "¡Identificador en uso!")
-        temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-        temp.place(x = USUARIO_X + 59, y = USUARIO_Y + 280)
-        temp.after(3000, lambda: temp.destroy())
+        crearLabelTemporal(ventana_nuevo_usuario, "¡Identificador en uso!", USUARIO_X + 59, USUARIO_Y + 280, 3000)
     
     usuarios.close()
 
@@ -522,6 +515,18 @@ def leerRegistro(archivo):
     linea = linea.rstrip()
     return linea.split(",")
 
+
+
+def convertirRegistro(registro):
+    linea = ""
+    
+    for c in range(len(registro)):
+        linea += registro[c] + ","
+        
+    linea = linea[ : -1]
+    linea += "\n"
+    
+    return linea
 
 
 def usuarioExiste(usuario):
@@ -577,6 +582,13 @@ def leerPreguntas():
     archivo.close()
     return preguntas    
 
+
+
+def crearLabelTemporal(raiz, texto, xp, yp, tiempo):
+    temp_label = Label(raiz, text = texto)
+    temp_label.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+    temp_label.place(x = xp, y = yp)
+    temp_label.after(tiempo, lambda: temp_label.destroy())
 
 
 def click_nuevo_usuario():
@@ -637,19 +649,18 @@ def acceder(ventana_acceso, entrada_usuario, entrada_clave):
     
     clave = usuarioExiste(usuario)  # Si el usuario existe la clave es no nula
     if(clave != "" and clave_actual == clave):
-        print("INGRESO EXITOSO")
-        click_ventana_cifrado()
+        if(not usuarioBloqueado(usuario)):
+            print("INGRESO EXITOSO")
+            click_ventana_cifrado()
+        else:
+            crearLabelTemporal(ventana_acceso, "USUARIO BLOQUEADO", USUARIO_X + 65, USUARIO_Y + 110, 5000)
     else:
-        temp1 = Label(ventana_acceso, text = "Identificador inexistente o clave errónea")
-        temp1.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-        temp1.place(x = USUARIO_X + 10, y = USUARIO_Y + 110)
+        segundo_texto = "Si no se encuentra registrado debe registrarse previamente o\nsi olvidó la clave presione el botón [Recuperar clave]"
+    
+        crearLabelTemporal(ventana_acceso, "Identificador inexistente o clave errónea", USUARIO_X + 10, USUARIO_Y + 110, 5000)
+        crearLabelTemporal(ventana_acceso, segundo_texto, USUARIO_X -60, USUARIO_Y + 130, 5000)
         
-        temp2 = Label(ventana_acceso, text = "Si no se encuentra registrado debe registrarse previamente o\nsi olvidó la clave presione el botón [Recuperar clave]")
-        temp2.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-        temp2.place(x = USUARIO_X - 60, y = USUARIO_Y + 130)
-        
-        temp1.after(5000, lambda: temp1.destroy())
-        temp2.after(5000, lambda: temp2.destroy())
+ 
     
 def click_acceso_usuario():
     ventana_acceso = crearVentanaAcceso()
@@ -701,33 +712,64 @@ def crearVentanaRecup(usuario):
 def click_recuperar_usuario(ventana_acceso, entrada_usuario):
     usuario = entrada_usuario.get("1.0", "end-1c")
     
-    if(usuarioExiste(usuario)):
+    if(usuarioExiste(usuario) and not usuarioBloqueado(usuario)):
         ventana_recup = crearVentanaRecup(usuario)
         ventana_recup.mainloop()
     else:
-        temp = Label(ventana_acceso, text = "Usuario inexistente")
-        temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-        temp.place(x = USUARIO_X + 70, y = USUARIO_Y + 220)
-        temp.after(3000, lambda: temp.destroy())
+        crearLabelTemporal(ventana_acceso, "Usuario inexistente o bloqueado", USUARIO_X + 58, USUARIO_Y + 220, 3000)
         
         
         
 def click_probar_recup(ventana_recup, entrada_respuesta, registro):
+    USUARIO   = 0
     CLAVE     = 1
     RESPUESTA = 3
     
     respuesta = entrada_respuesta.get("1.0", "end-1c")
   
     if(registro[RESPUESTA] == respuesta):
-        temp = Label(ventana_recup, text = "Su clave es: " + registro[CLAVE])
-        temp.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-        temp.place(x = USUARIO_X + 50, y = USUARIO_Y + 150)
-        temp.after(5000, lambda: temp.destroy())
+        crearLabelTemporal(ventana_recup, "Su clave es: " + registro[CLAVE], USUARIO_X + 50, USUARIO_Y + 150, 5000)
+        actualizarIntentos(registro[USUARIO], True)
     else:
-        temp = Label(ventana_recup, text = "¡Respuesta incorrecta!")
-        temp.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-        temp.place(x = USUARIO_X + 35, y = USUARIO_Y + 150)
-        temp.after(2000, lambda: temp.destroy())
+        crearLabelTemporal(ventana_recup, "¡Respuesta incorrecta!", USUARIO_X + 50, USUARIO_Y + 150, 1000)
+        intentos = actualizarIntentos(registro[USUARIO], False)
+        
+        if(intentos > 3):
+            crearLabelTemporal(ventana_recup, "Usuario bloqueado", USUARIO_X + 65, USUARIO_Y + 170, 1000)
+            ventana_recup.after(1000, lambda: ventana_recup.destroy())
+            
+        
+        
+def actualizarIntentos(usuario, acceso_exitoso):
+    intentos = 0
+    os.rename("usuarios.csv", "usuarios_old.csv")
+    usuarios_new = open("usuarios.csv", "w")
+    usuarios_old = open("usuarios_old.csv", "r")
+    
+    USUARIO  = 0
+    INTENTOS = 4
+    
+    registro = leerRegistro(usuarios_old)
+    while(registro != [""]):
+        if(registro[USUARIO] == usuario):
+            intentos = 0 if(acceso_exitoso) else int(registro[INTENTOS]) + 1
+            registro[INTENTOS] = str(intentos)
+        
+        usuarios_new.write(convertirRegistro(registro))
+        registro = leerRegistro(usuarios_old)
+        
+    usuarios_new.close()
+    usuarios_old.close()
+    os.remove("usuarios_old.csv")
+    
+    return intentos
+    
+    
+    
+def usuarioBloqueado(usuario):
+    INTENTOS = 4
+    registro = registroUsuario(usuario)
+    return int(registro[INTENTOS]) > 3
         
     
 #-------------------------------------VENTANA DE CIFRADO-------------------------------------#
