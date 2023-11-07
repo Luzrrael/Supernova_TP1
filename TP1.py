@@ -381,7 +381,7 @@ def crearVentanaPrincipal():
 
     MAIN_SECTION_Y = 30
 
-    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova. Para continuar presione [Continuar]; de lo contrario [Salir]:"
+    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova:"
     bienvenida = Label(ventana_principal, text = texto_bienvenida, wraplength = 350)
     bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
     bienvenida.place(x = 25, y = MAIN_SECTION_Y)
@@ -394,7 +394,7 @@ def crearVentanaPrincipal():
 
     #Boton para salir ----primera ventana----
 
-    btn_salir = Button(ventana_principal, text="Ingreso usuario", command=lambda: ventana_principal.destroy())
+    btn_salir = Button(ventana_principal, text="Ingreso usuario", command = click_acceso_usuario)
     btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
     btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
 
@@ -525,21 +525,41 @@ def leerRegistro(archivo):
 
 
 def usuarioExiste(usuario):
-    usuarios = open("usuarios.csv", "r")
-    existe = False
+    clave_usuario = ""
     
     USUARIO = 0
+    CLAVE   = 1
     
-    registro = leerRegistro(usuarios)
-    while(registro != [""] and not existe):
-        if(usuario == registro[USUARIO]):
-            existe = True
-            
+    if(os.path.isfile("./usuarios.csv")):
+        usuarios = open("usuarios.csv", "r")
         registro = leerRegistro(usuarios)
         
-    usuarios.close()
-    return existe
+        while(registro != [""] and not clave_usuario):
+            if(usuario == registro[USUARIO]):
+                clave_usuario = registro[CLAVE]
+            
+            registro = leerRegistro(usuarios)
+        
+        usuarios.close()
+        
+    return clave_usuario
     
+
+
+def registroUsuario(usuario):
+    USUARIO = 0
+    
+    if(os.path.isfile("./usuarios.csv")):
+        usuarios = open("usuarios.csv", "r")
+        registro = leerRegistro(usuarios)
+        
+        while(registro != [""] and usuario != registro[USUARIO]):
+            registro = leerRegistro(usuarios)
+        
+        usuarios.close()
+        
+    return registro
+
     
 
 def leerPreguntas():
@@ -562,6 +582,153 @@ def leerPreguntas():
 def click_nuevo_usuario():
     ventana_nuevo_usuario = crearVentanaNuevoUsuario()
     ventana_nuevo_usuario.mainloop()
+    
+#--------------------------------VENTANA DE INGRESO DE USUARIO-------------------------------#   
+
+def crearVentanaAcceso():
+
+    ventana_acceso = Tk()
+    ventana_acceso.resizable(False,False)
+    ventana_acceso.geometry("400x300")
+    ventana_acceso.title("Identificación para acceso")
+    ventana_acceso.iconbitmap("supernova.ico")
+    ventana_acceso.config(cursor="hand2", bg="#1C2833")
+
+    # Entrada de texto de usuario
+
+    label_entrada_usuario = Label(ventana_acceso, text="Usuario:")
+    label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_entrada_usuario.place(x = USUARIO_X, y = USUARIO_Y)
+    
+    entrada_usuario = Text(ventana_acceso,width = 15, height = 1) #Para obtener todo el texto usamos .get("1.0", "end-1c")
+    entrada_usuario.place(x = USUARIO_X + 75, y = USUARIO_Y)
+
+    # Entrada de texto de clave
+
+    label_entrada_clave = Label(ventana_acceso, text="Clave:")
+    label_entrada_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
+    label_entrada_clave.place(x = USUARIO_X + 8, y = USUARIO_Y + 30)
+
+    entrada_clave = Text(ventana_acceso, width = 15, height = 1)
+    entrada_clave.place(x = USUARIO_X + 75, y = USUARIO_Y + 30)
+    
+    # Botón de ingreso
+    
+    btn_ingresar = Button(ventana_acceso, text = "Ingresar", width = 10, height = 1, command = lambda: acceder(ventana_acceso, entrada_usuario, entrada_clave))
+    btn_ingresar.config(font="Arial 10 bold")
+    btn_ingresar.place(x = USUARIO_X + 90, y = USUARIO_Y + 70)
+    
+    # Botón de recuperación de clave
+    
+    btn_recuperar = Button(ventana_acceso, text = "Recuperar clave", width = 15, height = 1, command = lambda: click_recuperar_usuario(ventana_acceso, entrada_usuario))
+    btn_recuperar.config(font="Arial 10 bold")
+    btn_recuperar.place(x = USUARIO_X + 65, y = USUARIO_Y + 190)
+    
+    #entrada_pregunta = Text(ventana_acceso, width = 30, height = 1)
+    #entrada_pregunta.place(x = USUARIO_X, y = USUARIO_Y + 110)
+    
+    return ventana_acceso 
+    
+    
+   
+def acceder(ventana_acceso, entrada_usuario, entrada_clave):
+    usuario      = entrada_usuario.get("1.0", "end-1c")
+    clave_actual = entrada_clave.get("1.0", "end-1c")
+    
+    clave = usuarioExiste(usuario)  # Si el usuario existe la clave es no nula
+    if(clave != "" and clave_actual == clave):
+        print("INGRESO EXITOSO")
+        click_ventana_cifrado()
+    else:
+        temp1 = Label(ventana_acceso, text = "Identificador inexistente o clave errónea")
+        temp1.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+        temp1.place(x = USUARIO_X + 10, y = USUARIO_Y + 110)
+        
+        temp2 = Label(ventana_acceso, text = "Si no se encuentra registrado debe registrarse previamente o\nsi olvidó la clave presione el botón [Recuperar clave]")
+        temp2.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+        temp2.place(x = USUARIO_X - 60, y = USUARIO_Y + 130)
+        
+        temp1.after(5000, lambda: temp1.destroy())
+        temp2.after(5000, lambda: temp2.destroy())
+    
+def click_acceso_usuario():
+    ventana_acceso = crearVentanaAcceso()
+    ventana_acceso.mainloop()
+    
+#------------------------------VENTANA DE RECUPERACIÓN DE CLAVE------------------------------#
+
+def crearVentanaRecup(usuario):
+    PREGUNTA  = 2
+    RESPUESTA = 3
+ 
+    ventana_recup = Tk()
+    ventana_recup.resizable(False,False)
+    ventana_recup.geometry("400x300")
+    ventana_recup.title("Recuperación Clave")
+    ventana_recup.iconbitmap("supernova.ico")
+    ventana_recup.config(cursor="hand2", bg="#1C2833") 
+    
+    # Label de pregunta
+    
+    registro = registroUsuario(usuario)
+    pregunta = leerPreguntas()[int(registro[PREGUNTA]) - 1]
+    
+    label_pregunta = Label(ventana_recup, text = pregunta + ":")
+    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_pregunta.place(x = USUARIO_X - 50, y = USUARIO_Y)
+    
+    # Entrada de texto respuesta
+    """
+    label_entrada_respuesta = Label(ventana_recup, text = "Respuesta:")
+    label_entrada_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_entrada_respuesta.place(x = USUARIO_X + 80, y = USUARIO_Y + 120)
+    """
+    
+    entrada_respuesta = Text(ventana_recup, width = 15, height = 1)
+    entrada_respuesta.place(x = USUARIO_X + 58, y = USUARIO_Y + 60)
+    
+    # Botón de ingreso de respuesta
+    
+    btn_ingresar = Button(ventana_recup, text = "Ingresar", width = 10, height = 1, command = lambda: click_probar_recup(ventana_recup,\
+    entrada_respuesta, registro))
+    btn_ingresar.config(font="Arial 9 bold")
+    btn_ingresar.place(x = USUARIO_X + 80, y = USUARIO_Y + 90)    
+    
+    return ventana_recup
+    
+ 
+ 
+def click_recuperar_usuario(ventana_acceso, entrada_usuario):
+    usuario = entrada_usuario.get("1.0", "end-1c")
+    
+    if(usuarioExiste(usuario)):
+        ventana_recup = crearVentanaRecup(usuario)
+        ventana_recup.mainloop()
+    else:
+        temp = Label(ventana_acceso, text = "Usuario inexistente")
+        temp.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+        temp.place(x = USUARIO_X + 70, y = USUARIO_Y + 220)
+        temp.after(3000, lambda: temp.destroy())
+        
+        
+        
+def click_probar_recup(ventana_recup, entrada_respuesta, registro):
+    CLAVE     = 1
+    RESPUESTA = 3
+    
+    respuesta = entrada_respuesta.get("1.0", "end-1c")
+  
+    if(registro[RESPUESTA] == respuesta):
+        temp = Label(ventana_recup, text = "Su clave es: " + registro[CLAVE])
+        temp.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+        temp.place(x = USUARIO_X + 50, y = USUARIO_Y + 150)
+        temp.after(5000, lambda: temp.destroy())
+    else:
+        temp = Label(ventana_recup, text = "¡Respuesta incorrecta!")
+        temp.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+        temp.place(x = USUARIO_X + 35, y = USUARIO_Y + 150)
+        temp.after(2000, lambda: temp.destroy())
+        
     
 #-------------------------------------VENTANA DE CIFRADO-------------------------------------#
 # Autor: Matías Agustín Martínez   
