@@ -842,6 +842,12 @@ def crearVentanaCifrado(usuario):
     btn_enviar_atbash.config(font="Arial 10 bold", relief="raised", bd=3)
     btn_enviar_atbash.place(x = TOP_LEFT_X, y = TOP_LEFT_Y + 120)
     
+    # Botón de consulta de mensajes
+    
+    btn_consultar = Button(ventana_cifrado, text = "Consultar mensajes", width = 20, command = lambda: click_consultarMensajes(usuario))
+    btn_consultar.config(font="Arial 10 bold", relief="raised", bd=3)
+    btn_consultar.place(x = TOP_LEFT_X + 40, y = TOP_LEFT_Y + 170)
+    
     return ventana_cifrado
 
 
@@ -875,6 +881,76 @@ def al_presionar(boton, entrada_texto, entrada_clave):
     entrada_texto.insert("1.0",texto_cifrado)
 
 
+
+def click_consultarMensajes(usuario):
+    mensajes = None
+    
+    if(os.path.isfile("mensajes.csv")):
+        mensajes = open("mensajes.csv", "r")
+    else:
+        mensajes = open("mensajes.csv", "w+")
+      
+    a_todos = []
+    propios = []
+    
+    DESTINATARIO = 0
+    REMITENTE    = 1
+    CIFRADO      = 2
+    MENSAJE      = 3
+    
+    registro = leerRegistro(mensajes)
+    while(registro != [""]):
+        if(registro[DESTINATARIO] == "*"):
+            descifrado = descifrar_c(registro[MENSAJE], int((registro[CIFRADO])[1 : ])) if(registro[CIFRADO][0] == "C") else descifrar_atbash(registro[MENSAJE])
+            a_todos.append("#" + registro[REMITENTE] + ": " + descifrado)
+        elif(registro[DESTINATARIO] == usuario):
+            descifrado = descifrar_c(registro[MENSAJE], int((registro[CIFRADO])[1 : ])) if(registro[CIFRADO][0] == "C") else descifrar_atbash(registro[MENSAJE])
+            propios.append(registro[REMITENTE] + ": " + descifrado)
+            
+        registro = leerRegistro(mensajes)
+        
+    for i in range(len(a_todos)):
+        print(a_todos[i])
+        
+    for i in range(len(propios)):
+        print(propios[i])
+        
+    mostrarVentanaMensajes(a_todos, propios)
+        
+    mensajes.close()
+    
+    
+    
+def mostrarVentanaMensajes(m_a_todos, m_propios):
+
+    ventana_mensajes = Tk()
+    ventana_mensajes.resizable(False,False)
+    ventana_mensajes.geometry("400x400")
+    ventana_mensajes.title("Mensajes")
+    ventana_mensajes.iconbitmap("supernova.ico")
+    ventana_mensajes.config(cursor="hand2", bg="#1C2833")
+    
+    # Lista de mensajes
+    
+    mensajes = Listbox(ventana_mensajes, activestyle = NONE)
+    mensajes.config(font = "Arial 10 bold",bg="#1C2833",fg="white")
+    mensajes.pack(fill = BOTH, expand = 1)
+    
+    mensajes.insert(END, "Lista de mensajes: ")
+    mensajes.insert(END, "---------------------------------------------------------------------------------------------------")
+    
+    for m in range(len(m_a_todos)):
+        mensajes.insert(END, m_a_todos[m])
+        mensajes.insert(END, "---------------------------------------------------------------------------------------------------")
+ 
+    for m in range(len(m_propios)):
+        mensajes.insert(END, m_propios[m])
+        mensajes.insert(END, "---------------------------------------------------------------------------------------------------")  
+
+    mensajes.insert(END, "Total de mensajes: " + str(len(m_a_todos) + len(m_propios)))
+    
+    mensajes.mainloop()
+    
 
 def click_enviar(remitente, cifrado, entrada_clave, entrada_texto):
     ventana_envio = crearVentanaEnvio(remitente, cifrado, entrada_clave, entrada_texto)
@@ -929,31 +1005,24 @@ def click_probarEnvio(ventana, remitente, entrada_usuario, cifrado, entrada_clav
     clave_cifrado = entrada_clave.get()
     destinatario  = entrada_usuario.get("1.0", "end-1c")
     
-    mensajes = open("mensajes.csv", "a")     # Archivo donde se almacenan los mensajes
-    
-    if(destinatario == "*"):
-        usuarios = leerUsuarios()
-        usuarios.remove(remitente)
+         # Archivo donde se almacenan los mensajes
         
-        for u in range(len(usuarios)):
-            guardarMensaje(mensajes, usuarios[u], remitente, cifrado, clave_cifrado, texto_cifrado)
-            
-        crearLabelTemporal(ventana, "Mensaje enviado", USUARIO_X + 70, USUARIO_Y + 80, 3000)
-        
-    elif(usuarioExiste(destinatario) and destinatario != remitente and texto_cifrado != ""):
-        guardarMensaje(mensajes, destinatario, remitente, cifrado, clave_cifrado, texto_cifrado)
+    if((destinatario == "*" or usuarioExiste(destinatario)) and destinatario != remitente and texto_cifrado != ""):
+        guardarMensaje(destinatario, remitente, cifrado, clave_cifrado, texto_cifrado)
         crearLabelTemporal(ventana, "Mensaje enviado", USUARIO_X + 70, USUARIO_Y + 80, 3000)
     else:
         crearLabelTemporal(ventana, "Usuario inexistente", USUARIO_X + 65, USUARIO_Y + 80, 3000)
         
-    mensajes.close()
+    
         
         
         
-def guardarMensaje(archivo, destinatario, remitente, cifrado, clave, mensaje_cifrado):
+def guardarMensaje(destinatario, remitente, cifrado, clave, mensaje_cifrado):
+    mensajes = open("mensajes.csv", "a")
     cifrado = "A" if(cifrado == "A") else "C" + clave
     nueva_linea = destinatario + "," + remitente + "," + cifrado + "," + mensaje_cifrado + "\n"
-    archivo.write(nueva_linea)
+    mensajes.write(nueva_linea)
+    mensajes.close()
     
     
     
