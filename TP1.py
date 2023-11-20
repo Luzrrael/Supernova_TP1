@@ -1,11 +1,6 @@
-#Escribir una función que reciba el mensaje a cifrar (cadena de caracteres) y la clave de
-#cifrado, y devuelva el mensaje cifrado, mediante el cifrado césar. Probarla utilizando doctest,
-#con al menos 10 casos diferentes.
-
 from tkinter import *
+from tkinter import messagebox
 import os, os.path
-
-#***********************************************************
 
 def crearRelacion():
     #Autor: José Daniel Arturo Segura Valer
@@ -234,99 +229,255 @@ def descifrar_atbash(cadena):
     """
     
     return cifrar_atbash(cadena)
+
+#*******************************************************************************************************************************
+#*******************************************************************************************************************************
+#********************************SEGUNDA PARTE DEL TRABAJO PRACTICO*************************************************************
+#*******************************************************************************************************************************
+#*******************************************************************************************************************************
+
+#*************************************************************************************
+#********************************CONSTANTES*******************************************
+#*************************************************************************************
+
+#constantes para archivo usuarios.csv
+POSICION_USUARIO = 0
+POSICION_CLAVE = 1
+ID_PREGUNTA_DATOS = 2
+ID_RESPUESTA = 3
+POSICION_INTENTOS = 4
+#constantes para preguntas.csv
+ID_PREGUNTA_PREGUNTAS = 0
+POSICION_PREGUNTA_PREGUNTAS = 1
+#constante de final de archivo
+LINEA_FIN = ",,,,"
+#mensaje de condiciones al ingresar usuario o clave invalido
+REQUISITOS_USUARIO_CLAVE = "USUARIO: De 5 a 15 caracteres, simbolos validos “_” “-” “.”.\n\
+CLAVE: De 4 a 8 caracteres, una mayusucula, una minuscula, un numero y alguno de estos simbolos “_”,“-”,“#”,“*”.\n\
+No puede haber caracteres repetidos\nSe debe agregar una pregunta de recuperación"
+
+
+#*************************************************************************************
+#********************************FUNCIONES DE MAYOR USO*******************************
+#*************************************************************************************
+def leer_archivo(archivo):
+    """
+    Retorna una linea del archivo recibido en formatos lista,
+    si el archivo esta vacio o se llega al final enviara una lista
+    de 5 elementos para evitar en index of range
+    """
+    linea = archivo.readline()
+    linea = linea.rstrip()
+    if linea == "":
+        linea = LINEA_FIN
+    return linea.split(",")
+
+def verificar_existencia_de_archivo(archivo):
+    if os.path.exists(archivo):
+        modo = "r+"
+    else:
+        modo = "w"
+    return modo
+
+def crearLabelTemporal(raiz, texto, xp, yp, tiempo):
+    temp_label = Label(raiz, text = texto)
+    temp_label.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
+    temp_label.place(x = xp, y = yp)
+    temp_label.after(tiempo, lambda: temp_label.destroy())   
+
+#*******************************************************************************************
+#**********************************VENTANA PRINCIPAL****************************************
+#*******************************************************************************************
+
+def crearVentanaPrincipal():
+
+    ventana_principal = Tk()
+    ventana_principal.resizable(False,False)
+    ventana_principal.geometry("400x260")
+    ventana_principal.title("TP Grupal Parte 1 - Grupo: Supernova")
+    ventana_principal.config(cursor="hand2",bg="#1C2833")
+    ventana_principal.iconbitmap("supernova.ico")
     
-#***************************************************************
+    #****************************TEXTO ENTRADA************************************
 
-def validarUsuario(usuario):
+    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova:"
+    bienvenida = Label(ventana_principal, text = texto_bienvenida, wraplength = 350)
+    bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
+    bienvenida.place(x = 25, y = 30)
 
-        """
-        
-        >>> validarUsuario("")
-        False
-        
-        >>> validarUsuario("UsuarioDemasiadoExtenso")
-        False
-        
-        >>> validarUsuario("Usuario&&&")
-        False
-        
-        >>> validarUsuario("12345678")
-        True
-        
-        >>> validarUsuario("Agamenón")
-        True
-        
-        >>> validarUsuario("Ayante_Oileo")
-        True
-        
-        >>> validarUsuario("Diomedes_1282")
-        True
-        
-        >>> validarUsuario("Pony.infernal")
-        True
-        
-        >>> validarUsuario("##$")
-        False
-        
-        >>> validarUsuario("--------")
-        True
 
-        """
+    #****************************BOTONES*********************************************
+    
 
-        longitud_valida = True if(len(usuario) >= 5 and len(usuario) <= 15) else False
-        caracteres_validos = True
+    btn_crear_usuario = Button(ventana_principal, text="Registrarse", command=crear_ventana_registrarse)
+    btn_crear_usuario.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_crear_usuario.place(x=85, y =100)
+
+    btn_crear_usuario = Button(ventana_principal, text="Ingresar",command=crear_ventana_ingresar)
+    btn_crear_usuario.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
+    btn_crear_usuario.place(x=205, y =100)
+
+    #**************************INTEGRANTES**********************************************
+
+    t_integrantes = Label(ventana_principal, text="Construida por:")
+    t_integrantes.place(x=140,y =160)
+    t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
+
+    text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
+    integrantes = Label(ventana_principal, text=text_integrantes, wraplength=280)
+    integrantes.config(bg="#1C2833", fg="white")
+    integrantes.place(x=65,y = 180)
+
+    return ventana_principal
+
+
+#********************************************************************************************
+#*************************FUNCIONES NECESARIAS PARA VENTANA REGISTRARSE**********************
+#********************************************************************************************
+
+#**************************REQUISITOS PARA USUARIO Y CLAVE***********************************
+
+def validar_usuario(usuario):
+    """
         
-        if(longitud_valida):
-            i = 0;
-            while(i < len(usuario) and caracteres_validos):
-                if(not usuario[i].isalnum() and not usuario[i] in "_-."):
-                    caracteres_validos = False
-                
-                i += 1
-                
-        return longitud_valida and caracteres_validos
+    >>> validar_usuario("")
+    False
         
+    >>> validar_usuario("UsuarioDemasiadoExtenso")
+    False
         
-def validarClave(clave):
+    >>> validar_usuario("Usuario&&&")
+    False
+        
+    >>> validar_usuario("12345678")
+    True
+        
+    >>> validar_usuario("Agamenón")
+    True
+        
+    >>> validar_usuario("Ayante_Oileo")
+    True
+        
+    >>> validar_usuario("Diomedes_1282")
+    True
+        
+    >>> validar_usuario("Pony.infernal")
+    True
+        
+    >>> validar_usuario("##$")
+    False
+        
+    >>> validar_usuario("--------")
+    True
+
+    """
+    
+
+    caracteres_validos = "_-."
+    usuario_valido = True
+    longitud = len(usuario)
+
+    """Valida la longitud y si contiene algun caracter que no
+    en los caracteres validos"""
+
+    #Retorna un booleano
+
+    if longitud >= 5 and longitud <= 15:
+        iterador = 0
+        while usuario_valido == True and iterador != longitud:
+            caracter = usuario[iterador]
+            if caracter.isalnum() or caracter in caracteres_validos:
+                usuario_valido = True
+            else:
+                usuario_valido = False
+            iterador += 1
+    else:
+        usuario_valido = False
+    return usuario_valido
+
+#El validar clave que cree yo, uso el tuyo es mejor esta mas abajo
+"""
+def validar_clave(clave):
+    caracteres_validos = "_-#*"
+    longitud = False
+    mayuscula = False
+    minuscula = False
+    numero = False
+    simbolos = False
+    simbolo_invalido = True
+    repetido  = True
+
+    if len(clave) >= 4 and len(clave) <= 8:
+        longitud = True
+        caracter_anterior = None
+        for caracter in clave:
+            if caracter.isalnum() and caracter != caracter_anterior:
+                if caracter.isupper() and caracter != caracter_anterior:
+                    mayuscula = True
+                elif caracter.islower() and caracter != caracter_anterior:
+                    minuscula = True
+                elif caracter.isdigit() and caracter != caracter_anterior:
+                    numero = True
+            elif caracter in caracteres_validos and caracter != caracter_anterior:
+                simbolos = True
+            elif caracter == caracter_anterior:
+                repetido = False
+            else:
+                simbolo_invalido = False
+            caracter_anterior = caracter
+
+    if longitud and mayuscula and minuscula and numero and simbolos and repetido and simbolo_invalido:
+        valido = True
+    else:
+        valido = False
+    return valido"""
+#*****************************************************************************************************************************
+#*************************************Dejo tu validar clave es mejor que el mio************************************************
+#*****************************************************************************************************************************
+#Lo puse a ultimo momento asi que espero que no genere error, por si acaso dejare arriba el validar_clave que hice yo.
+#Por cierto en mi validacion de clave esta solucionado pero no me fije en el tuyo, si no te pasa.
+#valida esto Mat5#._ el punto no es valido pero si lo pone entre simbolos validos no da error fijate si pasa en el tuyo
+#yo puse la opcion simbolo invalido para solucionar el error que te dije
+def validar_clave(clave):
 
     """
         
     Demasiado corta:
-    >>> validarClave("123")
+    >>> validar_clave("123")
     False
     
     Sin mayúsculas:
-    >>> validarClave("jirafa1#")
+    >>> validar_clave("jirafa1#")
     False
     
     Sin minúsculas:
-    >>> validarClave("JIRAFA5*")
+    >>> validar_clave("JIRAFA5*")
     False
     
     Sin dígitos:
-    >>> validarClave("Jirafas-")
+    >>> validar_clave("Jirafas-")
     False
     
     Sin símbolos requeridos:
-    >>> validarClave("Jirafa7/")
+    >>> validar_clave("Jirafa7/")
     False
     
     Con todos los requisitos:
-    >>> validarClave("Jirafa9#")
+    >>> validar_clave("Jirafa9#")
     True
     
     Demasiado larga:
-    >>> validarClave("Hipopótamo3#")
+    >>> validar_clave("Hipopótamo3#")
     False
     
     Con caracteres adyacentes repetidos:
-    >>> validarClave("Sello42#")
+    >>> validar_clave("Sello42#")
     False
     
-    >>> validarClave("Cabra12*")
+    >>> validar_clave("Cabra12*")
     True
     
-    >>> validarClave("Dodo76-#")
+    >>> validar_clave("Dodo76-#")
     True
     
     """
@@ -355,410 +506,336 @@ def validarClave(clave):
             if(i < len(clave) and clave[i] == clave[i - 1]):
                 adyacentes = True
                 
-    return longitud_valida and hay_mayus and hay_minus and hay_digit and hay_simbolo and not adyacentes
-    
-    
-#***************************************************************
-    
-if __name__ == "__main__":
-    import doctest  
-    doctest.testmod()
-
-
-#--------------------------------------INTERFAZ GRAFICA--------------------------------------#
-
-#--------------------------------------VENTANA PRINCIPAL-------------------------------------#
-# Autor: Lucas Ezequiel Zenobio
-
-def crearVentanaPrincipal():
-
-    ventana_principal = Tk()
-    ventana_principal.resizable(False,False)
-    ventana_principal.geometry("400x300")
-    ventana_principal.title("TP Grupal Parte 1 - Grupo: Supernova")
-    ventana_principal.config(cursor="hand2",bg="#1C2833")
-    ventana_principal.iconbitmap("supernova.ico")
-
-    MAIN_SECTION_Y = 30
-
-    texto_bienvenida = "Bienvenido a la aplicación de mensajes secretos del grupo Supernova:"
-    bienvenida = Label(ventana_principal, text = texto_bienvenida, wraplength = 350)
-    bienvenida.config(font = "Arial 11 bold", bg = "#1C2833", fg = "white")
-    bienvenida.place(x = 25, y = MAIN_SECTION_Y)
-
-    #Boton para acceder a la siguiente ventana ---primera ventana----
-
-    btn_crear_usuario = Button(ventana_principal,text="Crear usuario", command = click_nuevo_usuario)
-    btn_crear_usuario.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-    btn_crear_usuario.place(x=85, y = MAIN_SECTION_Y + 80)
-
-    #Boton para salir ----primera ventana----
-
-    btn_salir = Button(ventana_principal, text="Ingreso usuario", command = click_acceso_usuario)
-    btn_salir.config(width=12 , height=1,font="Arial 10 bold", relief="raised", bd=4)
-    btn_salir.place(x=205, y = MAIN_SECTION_Y + 80)
-
-    #Sección de autores
-
-    MADE_BY_Y = 200
-
-    t_integrantes = Label(ventana_principal, text="Construida por:")
-    t_integrantes.place(x=140,y = MADE_BY_Y)
-    t_integrantes.config(font="Arial 11 bold",bg="#1C2833",fg="white")
-
-    text_integrantes = "Matias Agustin Martinez, Josue Daniel Arturo Segura Valer, Bryan Hernán Serrantes Ochoa, Lucas Ezequiel Zenobio, Federico Aguilar "
-    integrantes = Label(ventana_principal, text=text_integrantes, wraplength=280)
-    integrantes.config(bg="#1C2833", fg="white")
-    integrantes.place(x=65,y = MADE_BY_Y + 20)
-    
-    return ventana_principal
-    
-    
-    
-#------------------------------VENTANA DE CREACIÓN DE USUARIO--------------------------------#
-
-USUARIO_X = 85
-USUARIO_Y = 40
-
-def crearVentanaNuevoUsuario():
-
-    ventana_nuevo_usuario = Tk()
-    ventana_nuevo_usuario.resizable(False,False)
-    ventana_nuevo_usuario.geometry("400x350")
-    ventana_nuevo_usuario.title("Crear usuario")
-    ventana_nuevo_usuario.iconbitmap("supernova.ico")
-    ventana_nuevo_usuario.config(cursor="hand2", bg="#1C2833")
-
-    # Entrada de texto de usuario
-
-    label_entrada_usuario = Label(ventana_nuevo_usuario, text="Usuario:")
-    label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_entrada_usuario.place(x = USUARIO_X, y = USUARIO_Y)
-    
-    entrada_usuario = Text(ventana_nuevo_usuario,width = 15, height = 1) #Para obtener todo el texto usamos .get("1.0", "end-1c")
-    entrada_usuario.place(x = USUARIO_X + 75, y = USUARIO_Y)
-
-    # Entrada de texto de clave
-
-    label_entrada_clave = Label(ventana_nuevo_usuario, text="Clave:")
-    label_entrada_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
-    label_entrada_clave.place(x = USUARIO_X + 8, y = USUARIO_Y + 30)
-
-    entrada_clave = Text(ventana_nuevo_usuario, width = 15, height = 1)
-    entrada_clave.place(x = USUARIO_X + 75, y = USUARIO_Y + 30)
-    
-    # Menú de opciones pregunta de seguridad
-    
-    label_pregunta = Label(ventana_nuevo_usuario, text="Pregunta secreta:")
-    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_pregunta.place(x = USUARIO_X + 55, y = USUARIO_Y + 70)
-    
-    pregunta_actual = StringVar(ventana_nuevo_usuario)
-    pregunta_actual.set("Selecciona una pregunta") 
-    option_menu_pregunta = OptionMenu(ventana_nuevo_usuario, pregunta_actual, *leerPreguntas())
-    option_menu_pregunta.config(width = 30)
-    option_menu_pregunta.place(x = USUARIO_X + 8, y = USUARIO_Y + 100)
-    
-    # Entrada de texto respuesta
-    
-    label_entrada_respuesta = Label(ventana_nuevo_usuario, text = "Respuesta:")
-    label_entrada_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_entrada_respuesta.place(x = USUARIO_X + 80, y = USUARIO_Y + 140)
-    
-    entrada_respuesta = Text(ventana_nuevo_usuario, width = 15, height = 1)
-    entrada_respuesta.place(x = USUARIO_X + 58, y = USUARIO_Y + 170)
-    
-    # Botón de creación de usuario
-    
-    btn_crear = Button(ventana_nuevo_usuario, text = "Crear", width = 10, height = 1, command = lambda: guardarDatos(ventana_nuevo_usuario, \
-    entrada_usuario, entrada_clave, entrada_respuesta, pregunta_actual))
-    
-    btn_crear.config(font="Arial 12 bold")
-    btn_crear.place(x = USUARIO_X + 67, y = USUARIO_Y + 240)
-    
-    #entrada_pregunta = Text(ventana_nuevo_usuario, width = 30, height = 1)
-    #entrada_pregunta.place(x = USUARIO_X, y = USUARIO_Y + 110)
-    
-    return ventana_nuevo_usuario
-
-
-
-def guardarDatos(ventana_nuevo_usuario, entrada_usuario, entrada_clave, entrada_respuesta, pregunta_actual):
-    usuarios = open("usuarios.csv", "a")
-    preguntas = leerPreguntas()
-    
-    nuevo_usuario = entrada_usuario.get("1.0", "end-1c")
-    nueva_clave   = entrada_clave.get("1.0", "end-1c")
-    respuesta     = entrada_respuesta.get("1.0", "end-1c")
-    
-    # Si no se selecciona ninguna, la pregunta por defecto es la primera
-    if(pregunta_actual.get() not in preguntas):
-        pregunta_actual.set(preguntas[0])
-        
-    id_pregunta   = preguntas.index(pregunta_actual.get()) + 1
-    
-    # Validación y verificación de existencia
-    if(not usuarioExiste(nuevo_usuario)):
-        if(validarUsuario(nuevo_usuario) and validarClave(nueva_clave) and respuesta != ""):
-            usuarios.write(nuevo_usuario + "," + nueva_clave + "," + str(id_pregunta) + "," + respuesta + "," + "0\n")
-            crearLabelTemporal(ventana_nuevo_usuario, "Usuario creado", USUARIO_X + 72, USUARIO_Y + 280, 3000)
-        else:
-            crearLabelTemporal(ventana_nuevo_usuario, "Usuario, clave o respuesta inválidos", USUARIO_X + 10, USUARIO_Y + 280, 3000)
+    if longitud_valida and hay_mayus and hay_minus and hay_digit and hay_simbolo and not adyacentes:
+            valido = True
     else:
-        crearLabelTemporal(ventana_nuevo_usuario, "¡Identificador en uso!", USUARIO_X + 59, USUARIO_Y + 280, 3000)
+        valido = False
+    return valido
+
+
+
+#**************FUNCION COMPROBAR QUE USUARIO ESTE EN ARCHIVO*************************
+
+def buscar_usuario(usuario,archivo):
+    """
+    Revisa la existencia del usuario ingresado
+    en el archivo pertinente, 
+    retornando un boleano
+    """
+    #usuario pertenece a la variable ingresada
+    #user pertenece al archivo
+
+    registro = leer_archivo(archivo)
+    user = registro[POSICION_USUARIO]
+    existencia = False
+
+    while user != "" and existencia == False:
+        if usuario == user:
+            existencia = True
+        registro = leer_archivo(archivo)
+        user = registro[POSICION_USUARIO]
+    return existencia
+
+#**************FUNCION OBTENER INDICE DE PREGUNTA****************************
+
+def obtener_indice_de_pregunta(pregunta):
+    archivo = open("preguntas.csv")
+    preguntas = leer_archivo(archivo)
+    pregunta_archivo = preguntas[1]
+    while pregunta != pregunta_archivo:
+         preguntas = leer_archivo(archivo)
+         pregunta_archivo = preguntas[1]
+    archivo.close()
+    return preguntas[0]
+
+#***********FUNCION REGISTRAR DATOS EN ARCHIVO USUARIOS.CSV**************
+
+def registar_datos(usuario,clave,id_pregunta,respuesta,intentos_recuperacion,archivo):
+    archivo.write(usuario + "," + clave + "," + id_pregunta + "," + respuesta + "," + intentos_recuperacion + "\n")
+
+
+#********************************************************************************************
+#****************************VENTANA REGISTRARSE*********************************************
+#********************************************************************************************
+
+
+def crear_ventana_registrarse():
+
+    ventana_registrarse = Tk()
+    ventana_registrarse.resizable(False,False)
+    ventana_registrarse.geometry("240x280")
+    ventana_registrarse.title("Crear usuario")
+    ventana_registrarse.iconbitmap("supernova.ico")
+    ventana_registrarse.config(cursor="hand2", bg="#1C2833")
+
+    #LABEL USUARIO
+
+    label_entrada_usuario = Label(ventana_registrarse, text="Usuario:")
+    label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_entrada_usuario.place(x =5, y =40)
+
+    #CASILLA USUARIO
+
+    usuario = StringVar()
+    casilla_usuario = Entry(ventana_registrarse, textvariable=usuario)
+    casilla_usuario.config(width=24)
+    casilla_usuario.place(x = 80, y = 40)
+
+    # LABEL CLAVE
+
+    label_entrada_clave = Label(ventana_registrarse, text="Clave:")
+    label_entrada_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
+    label_entrada_clave.place(x = 5 , y =70)
+
+    #CASILLA CLAVE
+
+    clave = StringVar()
+    casilla_clave = Entry(ventana_registrarse, textvariable=clave)
+    casilla_clave.config(width=24)
+    casilla_clave.place(x = 80, y = 70)
     
-    usuarios.close()
+    #OBTENER PREGUNTAS
 
-
-
-def leerRegistro(archivo):
-    linea = archivo.readline()
-    linea = linea.rstrip()
-    return linea.split(",")
-
-
-
-def convertirRegistro(registro):
-    linea = ""
+    def opciones():
+        #Obtener las preguntas del archivo de preguntas
+        archivo = open("preguntas.csv")
+        registro = leer_archivo(archivo)
+        pregunta = registro[POSICION_PREGUNTA_PREGUNTAS]
+        lista_preguntas = []
+        while registro != LINEA_FIN.split(","):
+            lista_preguntas.append(pregunta)
+            registro = leer_archivo(archivo)
+            pregunta = registro[POSICION_PREGUNTA_PREGUNTAS]
+        archivo.close()
+        return lista_preguntas
     
-    for c in range(len(registro)):
-        linea += registro[c] + ","
-        
-    linea = linea[ : -1]
-    linea += "\n"
-    
-    return linea
+    #LABEL RECUPERACION
 
+    label_pregunta = Label(ventana_registrarse, text="Pregunta de recuperacion:")
+    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_pregunta.place(x = 5 , y =110)
 
-def usuarioExiste(usuario):
-    clave_usuario = ""
-    
-    USUARIO = 0
-    CLAVE   = 1
-    
-    if(os.path.isfile("./usuarios.csv")):
-        usuarios = open("usuarios.csv", "r")
-        registro = leerRegistro(usuarios)
-        
-        while(registro != [""] and not clave_usuario):
-            if(usuario == registro[USUARIO]):
-                clave_usuario = registro[CLAVE]
+    #MENU PREGUNTA RECUPERACION
+
+    pregunta_actual = StringVar(ventana_registrarse)
+    pregunta_actual.set("Selecciona una pregunta") 
+    option_menu_pregunta = OptionMenu(ventana_registrarse, pregunta_actual, *opciones())
+    option_menu_pregunta.config(width = 30,font = "Arial 8 bold")
+    option_menu_pregunta.place(x = 5, y = 140)
+
+    #LABEL RESPUESTA RECUPERACION
+
+    label_respuesta = Label(ventana_registrarse, text = "Respuesta:")
+    label_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_respuesta.place(x = 5 , y = 190)
+
+    #CASILLA RESPUESTA
+
+    respuesta = StringVar()
+    casilla_respuesta = Entry(ventana_registrarse, textvariable= respuesta)
+    casilla_respuesta.config(width=22)
+    casilla_respuesta.place(x = 95, y = 190)
+
+    #FUNCION QUE REDIRECCIONA LOS DATOS INGRESADOS A:
+    #  "FUNCIONES NECESARIAS PARA VENTANA REGISTRARSE"
+
+    def enviar_a_validar():
+
+        """Envia a validar el usuario y la clave a sus respectivas funciones,
+        muestra mensajes de informacion de error y correcta validación,
+        tambien las condiciones para que estos sean validos"""
+
+        usuario = casilla_usuario.get()
+        clave = casilla_clave.get()
+        pregunta = pregunta_actual.get()
+        respuesta = casilla_respuesta.get()
+
+        modo_de_apertura =  verificar_existencia_de_archivo("usuarios.csv")
+        archivo = open("usuarios.csv", modo_de_apertura)
+
+        #Suponiendo que nadie ingrese un usuario que no cumpla las condiciones
+        #primero busco la existencia de este, luego lo valido al mismo tiempo que la clave
+
+        if buscar_usuario(usuario,archivo):
+            messagebox.showerror("Error","Usuario Existente")
+        else:
+            if validar_usuario(usuario) and validar_clave(clave) and respuesta != "" and pregunta!="Selecciona una pregunta":
+                messagebox.showinfo("Validación", "Creado correctamente")
+                indice_pregunta = obtener_indice_de_pregunta(pregunta)
+                registar_datos(usuario,clave,indice_pregunta,respuesta,"0",archivo)
+                archivo.close()
+            else:
+                messagebox.showerror("Usuario o Constraseña invalido", REQUISITOS_USUARIO_CLAVE)
             
-            registro = leerRegistro(usuarios)
-        
-        usuarios.close()
-        
-    return clave_usuario
-    
+        archivo.close()
 
-# NOTA: Esta función podría reemplazar a la función usuarioExiste(usuario)
 
-def registroUsuario(usuario):
-    USUARIO = 0
-    
-    if(os.path.isfile("./usuarios.csv")):
-        usuarios = open("usuarios.csv", "r")
-        registro = leerRegistro(usuarios)
-        
-        while(registro != [""] and usuario != registro[USUARIO]):
-            registro = leerRegistro(usuarios)
-        
-        usuarios.close()
-        
-    return registro
+    #BOTON REGISTRAR
 
-    
+    btn_confirmar = Button(ventana_registrarse, text="Registrar",command=enviar_a_validar)
+    btn_confirmar.config(font="Arial 12 bold")
+    btn_confirmar.place(x = 72, y = 230)
 
-def leerPreguntas():
-    archivo = open("preguntas.csv", "r")
-    preguntas = []
-    PREGUNTA  = 1
-    
-    linea = archivo.readline()
-    while(linea):
-        linea = linea.rstrip()
-        registro = linea.split(",")
-        preguntas.append(registro[PREGUNTA])
-        linea = archivo.readline()
+    ventana_registrarse.mainloop()
+
+
+#*****************************************************************************************************
+#*************************************FUNCIONES VENTANA INGRESAR**************************************
+#*****************************************************************************************************
+
+def comprobar_usuario_clave(usuario,clave):
+    modo_de_apertura =  verificar_existencia_de_archivo("usuarios.csv")
+    archivo = open("usuarios.csv", modo_de_apertura)
+
+    #usuario y clave ingresados por el usuario
+    #user and password son obtenidos del archivo
+    #verifica la existencia del usuario y clave
+
+    registro = leer_archivo(archivo)
+    user = registro[POSICION_USUARIO]
+    password = registro[POSICION_CLAVE]
+
+    existencia = False
+
+    while registro != LINEA_FIN.split(",") and existencia == False:
+        if usuario == user and clave == password:
+            existencia = True
+        registro = leer_archivo(archivo)
+        user = registro[POSICION_USUARIO]
+        password = registro[POSICION_CLAVE]
     
     archivo.close()
-    return preguntas    
+    return existencia
 
+#***************************************************************************************
+#**********************************VENTANA INGRESAR*************************************
+#***************************************************************************************
 
+def crear_ventana_ingresar():
 
-def crearLabelTemporal(raiz, texto, xp, yp, tiempo):
-    temp_label = Label(raiz, text = texto)
-    temp_label.config(font = "Arial 9 bold",bg="#1C2833", fg="white")
-    temp_label.place(x = xp, y = yp)
-    temp_label.after(tiempo, lambda: temp_label.destroy())
+    ventana_ingresar = Tk()
+    ventana_ingresar.resizable(False,False)
+    ventana_ingresar.geometry("260x180")
+    ventana_ingresar.title("Identificación para acceso")
+    ventana_ingresar.iconbitmap("supernova.ico")
+    ventana_ingresar.config(cursor="hand2", bg="#1C2833")
 
+    #LABEL USUARIO
 
-def click_nuevo_usuario():
-    ventana_nuevo_usuario = crearVentanaNuevoUsuario()
-    ventana_nuevo_usuario.mainloop()
-    
-#--------------------------------VENTANA DE INGRESO DE USUARIO-------------------------------#   
+    label_usuario = Label(ventana_ingresar, text="Usuario:")
+    label_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_usuario.place(x = 10, y = 30)
 
-def crearVentanaAcceso():
+    #CASILLA USUARIO
 
-    ventana_acceso = Tk()
-    ventana_acceso.resizable(False,False)
-    ventana_acceso.geometry("400x300")
-    ventana_acceso.title("Identificación para acceso")
-    ventana_acceso.iconbitmap("supernova.ico")
-    ventana_acceso.config(cursor="hand2", bg="#1C2833")
+    usuario = StringVar()
+    casilla_usuario = Entry(ventana_ingresar, textvariable=usuario)
+    casilla_usuario.place(x = 80, y = 30)
 
-    # Entrada de texto de usuario
+    # LABEL CLAVE
 
-    label_entrada_usuario = Label(ventana_acceso, text="Usuario:")
-    label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_entrada_usuario.place(x = USUARIO_X, y = USUARIO_Y)
-    
-    entrada_usuario = Text(ventana_acceso,width = 15, height = 1) #Para obtener todo el texto usamos .get("1.0", "end-1c")
-    entrada_usuario.place(x = USUARIO_X + 75, y = USUARIO_Y)
+    label_clave = Label(ventana_ingresar, text="Clave:")
+    label_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
+    label_clave.place(x = 10 , y = 60)
 
-    # Entrada de texto de clave
+    #CASILLA CLAVE
 
-    label_entrada_clave = Label(ventana_acceso, text="Clave:")
-    label_entrada_clave.config(font = "Arial 11 bold",bg="#1C2833",fg="white")
-    label_entrada_clave.place(x = USUARIO_X + 8, y = USUARIO_Y + 30)
+    clave = StringVar()
+    casilla_clave = Entry(ventana_ingresar, textvariable=clave)
+    casilla_clave.place(x = 80, y = 60)
 
-    entrada_clave = Text(ventana_acceso, width = 15, height = 1)
-    entrada_clave.place(x = USUARIO_X + 75, y = USUARIO_Y + 30)
-    
-    # Botón de ingreso
-    
-    btn_ingresar = Button(ventana_acceso, text = "Ingresar", width = 10, height = 1, command = lambda: acceder(ventana_acceso, entrada_usuario, entrada_clave))
-    btn_ingresar.config(font="Arial 10 bold")
-    btn_ingresar.place(x = USUARIO_X + 90, y = USUARIO_Y + 70)
-    
-    # Botón de recuperación de clave
-    
-    btn_recuperar = Button(ventana_acceso, text = "Recuperar clave", width = 15, height = 1, command = lambda: click_recuperar_usuario(ventana_acceso, entrada_usuario))
-    btn_recuperar.config(font="Arial 10 bold")
-    btn_recuperar.place(x = USUARIO_X + 65, y = USUARIO_Y + 190)
-    
-    #entrada_pregunta = Text(ventana_acceso, width = 30, height = 1)
-    #entrada_pregunta.place(x = USUARIO_X, y = USUARIO_Y + 110)
-    
-    return ventana_acceso 
-    
-    
-   
-def acceder(ventana_acceso, entrada_usuario, entrada_clave):
-    usuario      = entrada_usuario.get("1.0", "end-1c")
-    clave_actual = entrada_clave.get("1.0", "end-1c")
-    
-    clave = usuarioExiste(usuario)  # Si el usuario existe la clave es no nula
-    if(clave != "" and clave_actual == clave):
-        if(not usuarioBloqueado(usuario)):
-            print("INGRESO EXITOSO")
-            click_ventana_cifrado(usuario)
+    #FUNCION AL PRESION BOTON INGRESAR
+
+    def presionar_ingresar():
+        usuario = casilla_usuario.get()
+        clave = casilla_clave.get()
+
+        modo_de_apertura =  verificar_existencia_de_archivo("usuarios.csv")
+        archivo = open("usuarios.csv", modo_de_apertura)
+
+        if not(buscar_usuario(usuario,archivo) and not usuarioBloqueado(usuario)):
+            archivo.close()
+            messagebox.showerror("Error","Usuario inexistente o bloqueado")
+        elif clave == "" or usuario == "":
+            messagebox.showerror("Error","Ingrese usuario y clave")
         else:
-            crearLabelTemporal(ventana_acceso, "USUARIO BLOQUEADO", USUARIO_X + 65, USUARIO_Y + 110, 5000)
-    else:
-        segundo_texto = "Si no se encuentra registrado debe registrarse previamente o\nsi olvidó la clave presione el botón [Recuperar clave]"
-    
-        crearLabelTemporal(ventana_acceso, "Identificador inexistente o clave errónea", USUARIO_X + 10, USUARIO_Y + 110, 5000)
-        crearLabelTemporal(ventana_acceso, segundo_texto, USUARIO_X -60, USUARIO_Y + 130, 5000)
-        
- 
-    
-def click_acceso_usuario():
-    ventana_acceso = crearVentanaAcceso()
-    ventana_acceso.mainloop()
-    
-#------------------------------VENTANA DE RECUPERACIÓN DE CLAVE------------------------------#
+            existencia_clave_usuario = comprobar_usuario_clave(usuario,clave)
+            if existencia_clave_usuario:
+                messagebox.showinfo("Acceso","Correcto")
+                ventana_ingresar.destroy()
+                click_ventana_cifrado(usuario)
+            else:
+                messagebox.showerror("Identificador inexistente o clave errónea"\
+                                     ,"Si no se encuentra registrado debe registrarse\
+ previamente o si olvidaste la clave presiona el botón recuperar clave")
+        archivo.close()
+    #BOTON INGRESAR
 
-def crearVentanaRecup(usuario):
-    PREGUNTA  = 2
-    RESPUESTA = 3
- 
-    ventana_recup = Tk()
-    ventana_recup.resizable(False,False)
-    ventana_recup.geometry("400x300")
-    ventana_recup.title("Recuperación Clave")
-    ventana_recup.iconbitmap("supernova.ico")
-    ventana_recup.config(cursor="hand2", bg="#1C2833") 
-    
-    # Label de pregunta
-    
-    registro = registroUsuario(usuario)
-    pregunta = leerPreguntas()[int(registro[PREGUNTA]) - 1]
-    
-    label_pregunta = Label(ventana_recup, text = pregunta + ":")
-    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_pregunta.place(x = USUARIO_X - 50, y = USUARIO_Y)
-    
-    # Entrada de texto respuesta
-    """
-    label_entrada_respuesta = Label(ventana_recup, text = "Respuesta:")
-    label_entrada_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_entrada_respuesta.place(x = USUARIO_X + 80, y = USUARIO_Y + 120)
-    """
-    
-    entrada_respuesta = Text(ventana_recup, width = 15, height = 1)
-    entrada_respuesta.place(x = USUARIO_X + 58, y = USUARIO_Y + 60)
-    
-    # Botón de ingreso de respuesta
-    
-    btn_ingresar = Button(ventana_recup, text = "Ingresar", width = 10, height = 1, command = lambda: click_probar_recup(ventana_recup,\
-    entrada_respuesta, registro))
-    btn_ingresar.config(font="Arial 9 bold")
-    btn_ingresar.place(x = USUARIO_X + 80, y = USUARIO_Y + 90)    
-    
-    return ventana_recup
-    
- 
- 
-def click_recuperar_usuario(ventana_acceso, entrada_usuario):
-    usuario = entrada_usuario.get("1.0", "end-1c")
-    
-    if(usuarioExiste(usuario) and not usuarioBloqueado(usuario)):
-        ventana_recup = crearVentanaRecup(usuario)
-        ventana_recup.mainloop()
-    else:
-        crearLabelTemporal(ventana_acceso, "Usuario inexistente o bloqueado", USUARIO_X + 30, USUARIO_Y + 220, 3000)
+    btn_ingresar_usuario = Button(ventana_ingresar, text="Ingresar", command=presionar_ingresar)
+    btn_ingresar_usuario.config(width=12 , height=1,font="Arial 10 bold")
+    btn_ingresar_usuario.place(x=10, y = 100)
+
+    #FUNCION AL PRESIONAR [RECUPERAR CLAVE]
+
+    def click_recuperar_usuario():
+        usuario = casilla_usuario.get() 
         
-        
-        
-def click_probar_recup(ventana_recup, entrada_respuesta, registro):
-    USUARIO   = 0
-    CLAVE     = 1
-    RESPUESTA = 3
-    
-    respuesta = entrada_respuesta.get("1.0", "end-1c")
-  
-    if(registro[RESPUESTA] == respuesta):
-        crearLabelTemporal(ventana_recup, "Su clave es: " + registro[CLAVE], USUARIO_X + 50, USUARIO_Y + 150, 5000)
-        actualizarIntentos(registro[USUARIO], True)
-    else:
-        crearLabelTemporal(ventana_recup, "¡Respuesta incorrecta!", USUARIO_X + 50, USUARIO_Y + 150, 1000)
-        intentos = actualizarIntentos(registro[USUARIO], False)
-        
-        if(intentos > 3):
-            crearLabelTemporal(ventana_recup, "Usuario bloqueado", USUARIO_X + 65, USUARIO_Y + 170, 1000)
-            ventana_recup.after(1000, lambda: ventana_recup.destroy())
-            
-        
-        
+        modo_de_apertura =  verificar_existencia_de_archivo("usuarios.csv")
+        archivo = open("usuarios.csv", modo_de_apertura)
+
+
+        if(buscar_usuario(usuario,archivo) and not usuarioBloqueado(usuario)):
+            archivo.close()
+            ventana_recup = crearVentanaRecup(usuario)
+            ventana_recup.mainloop()
+        else:
+            messagebox.showerror("Error","Usuario inexistente o bloqueado")
+        archivo.close() 
+
+     #BOTON RECUPERAR CLAVE
+
+    btn_recuperar_clave = Button(ventana_ingresar, text="Recuperar clave",command=click_recuperar_usuario)
+    btn_recuperar_clave.config(width=12 , height=1,font="Arial 10 bold", padx=10)
+    btn_recuperar_clave.place(x=125, y = 100)
+
+    ventana_ingresar.mainloop()
+
+#************************************************************************************************
+#************************FUNCIONES RECUPERACION DE CLAVE*****************************************
+#************************************************************************************************
+
+def obtener_pregunta(registro):
+        archivo = open("preguntas.csv")
+        preguntas = leer_archivo(archivo)
+        id_preg_archivo = preguntas[ID_PREGUNTA_PREGUNTAS] 
+        id_preg_registro = registro[ID_PREGUNTA_DATOS]
+
+        #guardo por si es la primera pregunta
+        #ya que no entraria al while
+
+        pregunta = preguntas[POSICION_PREGUNTA_PREGUNTAS]
+        while id_preg_registro != id_preg_archivo:
+            preguntas = leer_archivo(archivo)
+            id_preg_archivo = preguntas[ID_PREGUNTA_PREGUNTAS]
+            pregunta = preguntas[POSICION_PREGUNTA_PREGUNTAS]
+
+        archivo.close()
+        return pregunta
+
 def actualizarIntentos(usuario, acceso_exitoso):
     intentos = 0
     os.rename("usuarios.csv", "usuarios_old.csv")
     usuarios_new = open("usuarios.csv", "w")
     usuarios_old = open("usuarios_old.csv", "r")
     
-    USUARIO  = 0
-    INTENTOS = 4
-    
-    registro = leerRegistro(usuarios_old)
-    while(registro != [""]):
-        if(registro[USUARIO] == usuario):
-            intentos = 0 if(acceso_exitoso) else int(registro[INTENTOS]) + 1
-            registro[INTENTOS] = str(intentos)
+    registro = leer_archivo(usuarios_old)
+    while(registro != LINEA_FIN.split(",")):
+        if(registro[POSICION_USUARIO] == usuario):
+            intentos = 0 if(acceso_exitoso) else int(registro[POSICION_INTENTOS]) + 1
+            registro[POSICION_INTENTOS] = str(intentos)
         
         usuarios_new.write(convertirRegistro(registro))
-        registro = leerRegistro(usuarios_old)
+        registro = leer_archivo(usuarios_old)
         
     usuarios_new.close()
     usuarios_old.close()
@@ -766,15 +843,98 @@ def actualizarIntentos(usuario, acceso_exitoso):
     
     return intentos
     
+def convertirRegistro(registro):
+    linea = ""
     
+    for c in range(len(registro)):
+        linea += registro[c] + ","
+        
+    linea = linea[ : -1]
+    linea += "\n" 
+    
+    return linea
+
+def registroUsuario(usuario):
+    
+    if(os.path.isfile("./usuarios.csv")):
+        usuarios = open("usuarios.csv", "r")
+        registro = leer_archivo(usuarios)
+        
+        while(registro != LINEA_FIN.split(",") and usuario != registro[POSICION_USUARIO]):
+            registro = leer_archivo(usuarios)
+        
+        usuarios.close()
+        
+    return registro
     
 def usuarioBloqueado(usuario):
     INTENTOS = 4
     registro = registroUsuario(usuario)
     return int(registro[INTENTOS]) > 3
         
+
+#***********************************************************************************************
+#**************************VENTANA DE RECUPERACIÓN DE CLAVE**********************************
+#***************************************************************************************************
+
+USUARIO_X = 10
+USUARIO_Y = 15
+
+def crearVentanaRecup(usuario):
+
+    ventana_recup = Tk()
+    ventana_recup.resizable(False,False)
+    ventana_recup.geometry("240x180")
+    ventana_recup.title("Recuperación Clave")
+    ventana_recup.iconbitmap("supernova.ico")
+    ventana_recup.config(cursor="hand2", bg="#1C2833") 
     
-#-------------------------------------VENTANA DE CIFRADO-------------------------------------#
+    # Label de pregunta
+    
+    registro = registroUsuario(usuario)
+    pregunta = obtener_pregunta(registro)
+    
+    label_pregunta = Label(ventana_recup, text = pregunta + ":")
+    label_pregunta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_pregunta.place(x = USUARIO_X, y = USUARIO_Y)
+    
+    label_respuesta = Label(ventana_recup, text="Respuesta:")
+    label_respuesta.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
+    label_respuesta.place(x = USUARIO_X, y = USUARIO_Y + 30)
+
+    usuario_respuesta = StringVar()
+    entrada_respuesta = Entry(ventana_recup,textvariable=usuario_respuesta)
+    entrada_respuesta.place(x = USUARIO_X + 90 , y = USUARIO_Y + 30)
+    
+    #Al apretar [Recuperar]
+
+    def click_probar_recup(ventana_recup, entrada_respuesta, registro):
+    
+        respuesta = entrada_respuesta.get()
+    
+        if(registro[ID_RESPUESTA] == respuesta):
+            crearLabelTemporal(ventana_recup, "Su clave es: " + registro[POSICION_CLAVE], USUARIO_X, USUARIO_Y + 80, 6000)
+            actualizarIntentos(registro[POSICION_USUARIO], True)
+        else:
+            crearLabelTemporal(ventana_recup, "¡Respuesta incorrecta!", USUARIO_X, USUARIO_Y + 100, 1000)
+            intentos = actualizarIntentos(registro[POSICION_USUARIO], False)
+            
+            if(intentos > 3):
+                crearLabelTemporal(ventana_recup, "Usuario bloqueado", USUARIO_X, USUARIO_Y + 120, 2000)
+                ventana_recup.after(1000, lambda: ventana_recup.destroy())   
+    
+    # Botón de ingreso de respuesta
+    
+    btn_recuperar = Button(ventana_recup, text = "Recuperar", width = 10, height = 1, command = lambda: click_probar_recup(ventana_recup,\
+    entrada_respuesta, registro))
+    btn_recuperar.config(font="Arial 10 bold")
+    btn_recuperar.place(x = USUARIO_X, y = USUARIO_Y + 60)    
+    
+    return ventana_recup  
+
+#****************************************************************************************************
+#***********************************VENTANA DE CIFRADO***********************************************
+#****************************************************************************************************
 # Autor: Matías Agustín Martínez   
     
 def crearVentanaCifrado(usuario):
@@ -785,7 +945,7 @@ def crearVentanaCifrado(usuario):
     ventana_cifrado.resizable(False,False)
     ventana_cifrado.geometry("400x400")
     ventana_cifrado.title("Cifrado y envío de mensajes")
-    ventana_cifrado.iconbitmap("supernova.ico")
+    ventana_cifrado
     ventana_cifrado.config(cursor="hand2", bg="#1C2833")
 
     #ENTRADA DE TEXTO LABEL Y CASILLA -----SEGUNDA VENTANA-------
@@ -898,8 +1058,10 @@ def click_consultarMensajes(usuario):
     CIFRADO      = 2
     MENSAJE      = 3
     
-    registro = leerRegistro(mensajes)
-    while(registro != [""]):
+#buscar_usuario
+
+    registro = leer_archivo(mensajes)
+    while(registro != LINEA_FIN.split(",")):
         if(registro[DESTINATARIO] == "*"):
             descifrado = descifrar_c(registro[MENSAJE], int((registro[CIFRADO])[1 : ])) if(registro[CIFRADO][0] == "C") else descifrar_atbash(registro[MENSAJE])
             a_todos.append("#" + registro[REMITENTE] + ": " + descifrado)
@@ -907,7 +1069,7 @@ def click_consultarMensajes(usuario):
             descifrado = descifrar_c(registro[MENSAJE], int((registro[CIFRADO])[1 : ])) if(registro[CIFRADO][0] == "C") else descifrar_atbash(registro[MENSAJE])
             propios.append(registro[REMITENTE] + ": " + descifrado)
             
-        registro = leerRegistro(mensajes)
+        registro = leer_archivo(mensajes)
         
     for i in range(len(a_todos)):
         print(a_todos[i])
@@ -927,7 +1089,7 @@ def mostrarVentanaMensajes(m_a_todos, m_propios):
     ventana_mensajes.resizable(False,False)
     ventana_mensajes.geometry("400x400")
     ventana_mensajes.title("Mensajes")
-    ventana_mensajes.iconbitmap("supernova.ico")
+    ventana_mensajes
     ventana_mensajes.config(cursor="hand2", bg="#1C2833")
     
     # Lista de mensajes
@@ -976,7 +1138,7 @@ def crearVentanaEnvio(remitente, cifrado, entrada_clave, entrada_texto):
     ventana_envio.resizable(False,False)
     ventana_envio.geometry("400x200")
     ventana_envio.title(titulo)
-    ventana_envio.iconbitmap("supernova.ico")
+    ventana_envio
     ventana_envio.config(cursor="hand2", bg="#1C2833")
 
     # Entrada de texto de destinatario
@@ -1006,16 +1168,16 @@ def click_probarEnvio(ventana, remitente, entrada_usuario, cifrado, entrada_clav
     destinatario  = entrada_usuario.get("1.0", "end-1c")
     
          # Archivo donde se almacenan los mensajes
+    archivo = open("usuarios.csv")
         
-    if((destinatario == "*" or usuarioExiste(destinatario)) and destinatario != remitente and texto_cifrado != ""):
+    if((destinatario == "*" or buscar_usuario(destinatario,archivo)) and destinatario != remitente and texto_cifrado != ""):
         guardarMensaje(destinatario, remitente, cifrado, clave_cifrado, texto_cifrado)
+        archivo.close()
         crearLabelTemporal(ventana, "Mensaje enviado", USUARIO_X + 70, USUARIO_Y + 80, 3000)
     else:
         crearLabelTemporal(ventana, "Usuario inexistente", USUARIO_X + 65, USUARIO_Y + 80, 3000)
-        
+        archivo.close()
     
-        
-        
         
 def guardarMensaje(destinatario, remitente, cifrado, clave, mensaje_cifrado):
     mensajes = open("mensajes.csv", "a")
@@ -1040,12 +1202,20 @@ def leerUsuarios():
     
     archivo.close()
     return usuarios
-         
 
-#-------------------SECCIÓN MAIN-------------------#
+
+#****************************************************************************************
+#**********************************MAIN VENTANA PRINCIPAL********************************
+#****************************************************************************************
 
 def main():
     ventana_principal = crearVentanaPrincipal()
     ventana_principal.mainloop()
     
+
+if __name__ == "__main__":
+    import doctest  
+    doctest.testmod()
+
 main()
+
