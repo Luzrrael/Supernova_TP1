@@ -8,14 +8,6 @@ def crearRelacion():
     caracter_a_pos = {}
     pos_a_caracter = {}
     
-    # Creamos una tabla con los caracteres que pueden desplazarse;
-    # en nuestro caso  son sólo los alfanuméricos. La tabla asigna
-    # al caracter "a" la posición 0, al "b" la posición 1 y así su-
-    # cesivamente hasta llegar a la posición 63, que está asignada
-    # al caracter "9". Esta tabla se opera con dos diccionarios, uno
-    # que dado un caracter devuelve su posición, y otro que dada una
-    # posición devuelve un caracter
-    
     minusculas = "abcdefghijklmnñopqrstuvwxyz"
     mayusculas = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
     digitos    = "0123456789"
@@ -46,11 +38,6 @@ def desplazar(caracter, clave):
     # Desplaza un solo caracter hacia la derecha 'clave' veces, usando
     # la tabla de caracteres y posiciones definida por los diccionarios
     # caracter_a_pos y pos_a_caracter
-
-    # cantidad : Tamaño del grupo según tipo de caracter. Hay 27 minúsculas, 27 mayúsculas y 10 dígitos
-    # offset   : distancia del primer caracter del grupo al inicio de la tabla. La "a" dista 0 posiciones, 
-    #            la "A" 27 y el "0" 54
-    # alnum    : Indicador de caracter alfanumérico. Si es falso el caracter hallado no se altera.
 
     cantidad = 0
     offset   = 0
@@ -140,10 +127,6 @@ def asignar(caracter):
 
     # Asigna a cada caracter su opuesto correspondiente, haciéndolo
     # mayúscula si es minúscula y viceversa
-
-    # dist_ini : Distancia del caracter a la posición 0 dentro de su grupo
-    # pos_fin  : La mayor posición dentro del grupo. Por ejemplo, dentro de los
-    #            dígitos es la posición 9.
 
     offset    = 0
     dist_ini  = 0
@@ -395,49 +378,7 @@ def validar_usuario(usuario):
         usuario_valido = False
     return usuario_valido
 
-#El validar clave que cree yo, uso el tuyo es mejor esta mas abajo
-"""
-def validar_clave(clave):
-    caracteres_validos = "_-#*"
-    longitud = False
-    mayuscula = False
-    minuscula = False
-    numero = False
-    simbolos = False
-    simbolo_invalido = True
-    repetido  = True
 
-    if len(clave) >= 4 and len(clave) <= 8:
-        longitud = True
-        caracter_anterior = None
-        for caracter in clave:
-            if caracter.isalnum() and caracter != caracter_anterior:
-                if caracter.isupper() and caracter != caracter_anterior:
-                    mayuscula = True
-                elif caracter.islower() and caracter != caracter_anterior:
-                    minuscula = True
-                elif caracter.isdigit() and caracter != caracter_anterior:
-                    numero = True
-            elif caracter in caracteres_validos and caracter != caracter_anterior:
-                simbolos = True
-            elif caracter == caracter_anterior:
-                repetido = False
-            else:
-                simbolo_invalido = False
-            caracter_anterior = caracter
-
-    if longitud and mayuscula and minuscula and numero and simbolos and repetido and simbolo_invalido:
-        valido = True
-    else:
-        valido = False
-    return valido"""
-#*****************************************************************************************************************************
-#*************************************Dejo tu validar clave es mejor que el mio************************************************
-#*****************************************************************************************************************************
-#Lo puse a ultimo momento asi que espero que no genere error, por si acaso dejare arriba el validar_clave que hice yo.
-#Por cierto en mi validacion de clave esta solucionado pero no me fije en el tuyo, si no te pasa.
-#valida esto Mat5#._ el punto no es valido pero si lo pone entre simbolos validos no da error fijate si pasa en el tuyo
-#yo puse la opcion simbolo invalido para solucionar el error que te dije
 def validar_clave(clave):
 
     """
