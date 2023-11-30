@@ -1077,7 +1077,7 @@ def crearVentanaEnvio(remitente, cifrado, entrada_clave, entrada_texto):
     
     ventana_envio = Tk()
     ventana_envio.resizable(False,False)
-    ventana_envio.geometry("400x200")
+    ventana_envio.geometry("250x130")
     ventana_envio.title(titulo)
     ventana_envio
     ventana_envio.config(cursor="hand2", bg="#1C2833")
@@ -1086,10 +1086,10 @@ def crearVentanaEnvio(remitente, cifrado, entrada_clave, entrada_texto):
 
     label_entrada_usuario = Label(ventana_envio, text="Usuario:")
     label_entrada_usuario.config(font = "Arial 11 bold",bg="#1C2833", fg="white")
-    label_entrada_usuario.place(x = USUARIO_X - 10, y = USUARIO_Y)
+    label_entrada_usuario.place(x = USUARIO_X , y = USUARIO_Y)
     
     entrada_usuario = Text(ventana_envio,width = 15, height = 1) #Para obtener todo el texto usamos .get("1.0", "end-1c")
-    entrada_usuario.place(x = USUARIO_X + 65, y = USUARIO_Y)
+    entrada_usuario.place(x = USUARIO_X + 75, y = USUARIO_Y)
     
     # Botón de ingreso
     
